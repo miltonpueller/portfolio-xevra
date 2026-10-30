@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Estoy Ganando Dinero? — Calculadora de Rentabilidad</title>
+<meta name="description" content="Calculadora inteligente de rentabilidad para emprendedores. Descubrí si tu precio te hace ganar o perder dinero.">
+
+<!-- ============================================================
+     FUENTES: Inter (texto general) + IBM Plex Mono (cifras/datos)
+     ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     LIBRERÍAS EXTERNAS (únicamente vía CDN, sin instalar nada)
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* ================================================================
+   1. DESIGN TOKENS
+   ================================================================ */
+:root{
+  --bg:#FAF9F6;
+  --bg-elevated:#FFFFFF;
+  --bg-sunken:#F1EFE9;
+  --border:#E6E3DA;
+  --text:#171A1C;
+  --text-muted:#5E6469;
+  --text-faint:#8B9096;
+
+  --accent:#0E7C61;
+  --accent-strong:#0A5C48;
+  --accent-soft:#E3F2EC;
+  --accent-line:#BFE3D4;
+
+  --warn:#C97A1B;
+  --warn-soft:#FBEEDD;
+  --danger:#C0392E;
+  --danger-soft:#FBE9E7;
+  --success:#1E8F5F;
+  --success-soft:#E4F4EA;
+
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:26px;
+  --radius-pill:999px;
+
+  --shadow-sm:0 1px 2px rgba(23,26,28,0.05), 0 1px 1px rgba(23,26,28,0.04);
+  --shadow-md:0 10px 30px rgba(23,26,28,0.08);
+  --shadow-lg:0 20px 60px rgba(23,26,28,0.12);
+
+  --font-sans:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+
+  --ease:cubic-bezier(.16,.84,.44,1);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0B0D0E;
+    --bg-elevated:#15181A;
+    --bg-sunken:#1B1F21;
+    --border:#272C2F;
+    --text:#F1F0EC;
+    --text-muted:#A2A8AC;
+    --text-faint:#6E7478;
+
+    --accent:#33C793;
+    --accent-strong:#5FE0B2;
+    --accent-soft:#12332A;
+    --accent-line:#1E4E3F;
+
+    --warn:#E3A24A;
+    --warn-soft:#332612;
+    --danger:#E8695D;
+    --danger-soft:#341917;
+    --success:#3FDB9E;
+    --success-soft:#12332A;
+
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md:0 10px 30px rgba(0,0,0,0.45);
+    --shadow-lg:0 25px 70px rgba(0,0,0,0.55);
+  }
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  transition:background .3s var(--ease), color .3s var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important; transition-duration:.01ms !important;}
+}
+
+.app-shell{max-width:1280px;margin:0 auto;padding:0 24px 80px;}
+
+button, input, select{font-family:inherit;color:inherit;}
+a{color:inherit;text-decoration:none;}
+
+::selection{background:var(--accent-soft);}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+
+/* ================================================================
+   2. TOPBAR
+   ================================================================ */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 0;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;}
+.brand-mark{
+  width:30px;height:30px;border-radius:9px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand-mark svg{width:16px;height:16px;stroke:#fff;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.btn-lang{
+  font-size:12.5px;font-weight:700;color:var(--text);background:var(--bg-elevated);
+  border:1px solid var(--border);padding:7px 13px;border-radius:var(--radius-pill);
+  cursor:pointer;transition:all .2s var(--ease);display:flex;align-items:center;gap:6px;
+}
+.btn-lang:hover{border-color:var(--accent);color:var(--accent-strong);transform:translateY(-1px);}
+.topbar-cta{
+  font-size:13px;font-weight:600;color:var(--accent-strong);
+  padding:9px 16px;border:1px solid var(--accent-line);border-radius:var(--radius-pill);
+  background:var(--accent-soft);transition:all .2s var(--ease);
+  display:none;
+}
+.topbar-cta:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+@media (min-width:720px){.topbar-cta{display:inline-block;}}
+
+/* ================================================================
+   3. HERO
+   ================================================================ */
+.hero{padding:36px 0 44px;max-width:680px;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:600;color:var(--accent-strong);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  padding:5px 12px;border-radius:var(--radius-pill);margin-bottom:18px;
+  letter-spacing:.01em;
+}
+.hero h1{
+  font-size:clamp(32px, 5vw, 48px);
+  font-weight:800;letter-spacing:-.02em;line-height:1.08;margin-bottom:14px;
+}
+.hero h1 .hl{color:var(--accent);}
+.hero .lead{font-size:16.5px;color:var(--text-muted);max-width:560px;margin-bottom:26px;}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+.btn{
+  appearance:none;border:none;cursor:pointer;
+  font-size:14px;font-weight:600;border-radius:var(--radius-sm);
+  padding:12px 20px;transition:transform .15s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  display:inline-flex;align-items:center;gap:8px;line-height:1;
+}
+.btn:active{transform:scale(.97);}
+.btn svg{width:15px;height:15px;flex-shrink:0;}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:var(--shadow-sm);}
+.btn-primary:hover{background:var(--accent-strong);box-shadow:var(--shadow-md);}
+.btn-secondary{background:var(--bg-elevated);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent-strong);}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid transparent;}
+.btn-ghost:hover{color:var(--danger);background:var(--danger-soft);}
+.btn-block{width:100%;justify-content:center;}
+
+/* ================================================================
+   4. LAYOUT PRINCIPAL
+   ================================================================ */
+.workspace{
+  display:grid;grid-template-columns:1fr;gap:24px;
+}
+@media (min-width:960px){
+  .workspace{grid-template-columns:380px 1fr;align-items:flex-start;}
+  .form-panel{position:sticky;top:24px;max-height:calc(100vh - 48px);overflow-y:auto;}
+}
+
+.panel{
+  background:var(--bg-elevated);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);
+}
+
+/* ---------------- FORMULARIO ---------------- */
+.form-panel{padding:26px 24px 30px;}
+.form-panel::-webkit-scrollbar{width:6px;}
+.form-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+.form-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.form-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:22px;}
+
+fieldset{border:none;margin:0 0 22px;padding:0;}
+fieldset legend{
+  font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-faint);margin-bottom:12px;padding:0;
+}
+
+.field{margin-bottom:14px;}
+.field label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);
+}
+.field label .hint{font-size:11.5px;font-weight:500;color:var(--text-faint);}
+
+.input, select.input{
+  width:100%;background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;
+  transition:border-color .15s var(--ease), background .15s var(--ease);
+}
+.input:focus{border-color:var(--accent);background:var(--bg-elevated);}
+.input.has-error{border-color:var(--danger);background:var(--danger-soft);}
+
+.input-money{position:relative;}
+.input-money .input{padding-left:30px;}
+.input-money::before{
+  content:"$";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:var(--text-faint);font-size:14px;font-weight:600;pointer-events:none;
+}
+
+.error-msg{font-size:11.5px;color:var(--danger);margin-top:5px;display:none;font-weight:500;}
+.error-msg.show{display:block;}
+
+.checkbox-row{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  margin-bottom:8px;cursor:pointer;transition:border-color .15s var(--ease), background .15s var(--ease);
+  font-size:13.5px;font-weight:500;
+}
+.checkbox-row:hover{border-color:var(--accent-line);}
+.checkbox-row input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.checkbox-row.checked{background:var(--accent-soft);border-color:var(--accent-line);}
+.checkbox-row .com-tag{margin-left:auto;font-size:11px;color:var(--text-faint);font-family:var(--font-mono);}
+
+.custom-comision{display:none;margin-top:4px;margin-bottom:8px;}
+.custom-comision.show{display:block;}
+
+.slider-wrap{padding:4px 2px;}
+input[type="range"]{
+  width:100%;height:5px;border-radius:99px;background:var(--border);
+  appearance:none;outline:none;margin:12px 0 4px;
+}
+input[type="range"]::-webkit-slider-thumb{
+  appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);
+  border:3px solid var(--bg-elevated);box-shadow:0 0 0 1px var(--accent);cursor:pointer;
+}
+input[type="range"]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;background:var(--accent);
+  border:3px solid var(--bg-elevated);box-shadow:0 0 0 1px var(--accent);cursor:pointer;
+}
+.slider-value{
+  display:flex;justify-content:space-between;font-size:12px;color:var(--text-faint);
+}
+.slider-value strong{font-family:var(--font-mono);font-size:15px;color:var(--accent-strong);font-weight:600;}
+
+/* ---------------- RESULTADOS ---------------- */
+.results-panel{display:flex;flex-direction:column;gap:20px;}
+
+.section-heading{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;}
+.section-heading h2{font-size:15px;font-weight:700;}
+.section-heading span{font-size:12px;color:var(--text-faint);}
+
+.cards-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+}
+@media (min-width:560px){.cards-grid{grid-template-columns:repeat(3,1fr);}}
+
+.card{
+  background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);
+  padding:16px 16px 14px;box-shadow:var(--shadow-sm);
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.card .card-label{font-size:11.5px;color:var(--text-faint);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+.card .card-value{font-family:var(--font-mono);font-size:19px;font-weight:600;letter-spacing:-.01em;}
+.card .card-sub{font-size:11.5px;color:var(--text-muted);margin-top:4px;}
+.card.accent{border-color:var(--accent-line);background:var(--accent-soft);}
+.card.accent .card-value{color:var(--accent-strong);}
+.card.warn{border-color:var(--warn);background:var(--warn-soft);}
+.card.warn .card-value{color:var(--warn);}
+.card.danger{border-color:var(--danger);background:var(--danger-soft);}
+.card.danger .card-value{color:var(--danger);}
+.card.premium{background:linear-gradient(155deg, var(--accent-soft), var(--bg-elevated));border-color:var(--accent-line);}
+
+/* ---------------- GRAFICOS ---------------- */
+.charts-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+@media (min-width:720px){.charts-grid{grid-template-columns:1fr 1fr;}}
+.chart-card{padding:20px 18px;}
+.chart-card h3{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+.chart-card p{font-size:12px;color:var(--text-faint);margin-bottom:12px;}
+.chart-holder{position:relative;height:220px;}
+
+/* ---------------- RADIOGRAFIA ---------------- */
+.radiografia{padding:26px 24px;display:grid;grid-template-columns:1fr;gap:24px;}
+@media (min-width:720px){.radiografia{grid-template-columns:220px 1fr;align-items:center;}}
+
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;}
+.gauge-svg{width:200px;height:120px;}
+.gauge-score{font-family:var(--font-mono);font-size:38px;font-weight:600;margin-top:-46px;letter-spacing:-.02em;}
+.gauge-max{font-size:12px;color:var(--text-faint);margin-top:-4px;}
+.gauge-state{
+  margin-top:10px;font-size:12.5px;font-weight:700;padding:5px 14px;border-radius:var(--radius-pill);
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.gauge-state.excelente{background:var(--success-soft);color:var(--success);}
+.gauge-state.buena{background:var(--accent-soft);color:var(--accent-strong);}
+.gauge-state.regular{background:var(--warn-soft);color:var(--warn);}
+.gauge-state.critica{background:var(--danger-soft);color:var(--danger);}
+
+.report-text{font-size:13.8px;line-height:1.65;color:var(--text-muted);}
+.report-text strong{color:var(--text);}
+
+/* ---------------- ANALISIS INTELIGENTE ---------------- */
+.analysis{padding:22px 24px 24px;}
+.analysis h2{font-size:15px;font-weight:700;margin-bottom:14px;}
+.rules-list{display:flex;flex-direction:column;gap:9px;}
+.rule-item{
+  display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:var(--radius-sm);
+  font-size:13.3px;font-weight:500;border:1px solid transparent;
+  animation:ruleIn .35s var(--ease) both;
+}
+@keyframes ruleIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.rule-item svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+.rule-item.success{background:var(--success-soft);color:var(--success);}
+.rule-item.warn{background:var(--warn-soft);color:var(--warn);}
+.rule-item.danger{background:var(--danger-soft);color:var(--danger);}
+.rule-item.info{background:var(--bg-sunken);color:var(--text-muted);}
+
+/* ---------------- CONTADOR DE PERDIDA ---------------- */
+.perdida-box{
+  padding:22px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  border-color:var(--danger);background:linear-gradient(155deg, var(--danger-soft), var(--bg-elevated));
+}
+.perdida-box.hidden{display:none;}
+.perdida-icon{
+  width:44px;height:44px;border-radius:var(--radius-sm);background:var(--danger);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.perdida-icon svg{width:22px;height:22px;stroke:#fff;}
+.perdida-text{flex:1;min-width:200px;}
+.perdida-text .label{font-size:12.5px;color:var(--text-muted);font-weight:600;}
+.perdida-value{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--danger);letter-spacing:-.01em;}
+
+/* ---------------- ACCIONES / EXPORT ---------------- */
+.export-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ---------------- CTA FINAL ---------------- */
+.cta-panel{
+  margin-top:56px;padding:44px 34px;border-radius:var(--radius-lg);
+  background:linear-gradient(155deg, var(--accent-strong), var(--accent));
+  color:#fff;text-align:center;box-shadow:var(--shadow-lg);
+}
+.cta-panel h2{font-size:clamp(22px,3.4vw,30px);font-weight:800;margin-bottom:10px;letter-spacing:-.01em;}
+.cta-panel p{font-size:15px;opacity:.92;max-width:560px;margin:0 auto 24px;line-height:1.6;}
+.cta-btn{
+  display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--accent-strong);
+  font-weight:700;font-size:15.5px;padding:15px 30px;border-radius:var(--radius-pill);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);transition:transform .18s var(--ease);
+}
+.cta-btn:hover{transform:translateY(-2px) scale(1.02);}
+
+footer{text-align:center;padding:30px 0 10px;font-size:12px;color:var(--text-faint);}
+
+@media print{
+  .topbar, .hero-actions, .eyebrow, .form-panel, .export-row, .cta-panel, footer, .btn, .btn-lang{display:none !important;}
+  body{background:#fff;color:#000;}
+  .panel{box-shadow:none;border:1px solid #ccc;}
+  .workspace{grid-template-columns:1fr !important;}
+}
+
+@media (max-width:480px){
+  .app-shell{padding:0 16px 60px;}
+  .cards-grid{grid-template-columns:repeat(2,1fr);}
+  .card .card-value{font-size:16.5px;}
+  .radiografia{padding:20px 18px;}
+  .cta-panel{padding:34px 20px;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ============================================================
+       TOPBAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </span>
+      <span data-i18n="topbar_brand">¿Estoy Ganando Dinero?</span>
+    </div>
+    <div class="topbar-right">
+      <button id="btnLang" class="btn-lang" type="button" title="Alternar idioma / Toggle language">
+        🌐 <span id="langLabel">EN</span>
+      </button>
+      <a href="#cta" class="topbar-cta" data-i18n="topbar_cta">Quiero mi página web</a>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="hero">
+    <span class="eyebrow" data-i18n="eyebrow">Calculadora para emprendedores</span>
+    <h1 data-i18n="hero_title">¿Estoy ganando <span class="hl">dinero</span> de verdad?</h1>
+    <p class="lead" data-i18n="hero_lead">Cargá los costos de tu producto o servicio y descubrí, en segundos, si tu precio te está haciendo ganar o perder plata cada mes.</p>
+    <div class="hero-actions">
+      <button id="btnEjemplo" class="btn btn-secondary" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+        <span data-i18n="btn_ejemplo">Cargar ejemplo</span>
+      </button>
+      <button id="btnLimpiar" class="btn btn-ghost" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+        <span data-i18n="btn_limpiar">Limpiar</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WORKSPACE: FORMULARIO + RESULTADOS
+       ============================================================ -->
+  <main class="workspace">
+
+    <!-- ---------------- FORMULARIO ---------------- -->
+    <form id="calcForm" class="panel form-panel" novalidate>
+      <div class="form-title" data-i18n="form_title">Contanos tu negocio</div>
+      <div class="form-subtitle" data-i18n="form_subtitle">Todo se calcula automáticamente mientras escribís.</div>
+
+      <fieldset>
+        <legend data-i18n="leg_vendes">Qué vendés</legend>
+        <div class="field">
+          <label for="tipoProducto" data-i18n="lbl_tipo">Tipo de producto o servicio</label>
+          <select id="tipoProducto" class="input">
+            <option value="fisico" data-i18n="opt_fisico">Producto físico</option>
+            <option value="servicio" data-i18n="opt_servicio">Servicio</option>
+            <option value="comida" data-i18n="opt_comida">Comida</option>
+            <option value="indumentaria" data-i18n="opt_indumentaria">Indumentaria</option>
+            <option value="digital" data-i18n="opt_digital">Producto digital</option>
+            <option value="otro" data-i18n="opt_otro">Otro</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="leg_costos">Costos del producto</legend>
+        <div class="field">
+          <label for="costoProducto"><span data-i18n="lbl_costo_prod">Costo del producto</span> <span class="hint" data-i18n="hint_unidad">por unidad</span></label>
+          <div class="input-money"><input type="number" min="0" step="0.01" id="costoProducto" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-costoProducto" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="costoFabricacion"><span data-i18n="lbl_costo_fab">Costo de fabricación</span> <span class="hint" data-i18n="hint_unidad">por unidad</span></label>
+          <div class="input-money"><input type="number" min="0" step="0.01" id="costoFabricacion" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-costoFabricacion" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="costoInsumos"><span data-i18n="lbl_costo_ins">Costo de insumos</span> <span class="hint" data-i18n="hint_unidad">por unidad</span></label>
+          <div class="input-money"><input type="number" min="0" step="0.01" id="costoInsumos" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-costoInsumos" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="costoEmbalaje"><span data-i18n="lbl_costo_emb">Costo de embalaje</span> <span class="hint" data-i18n="hint_aplica">si aplica</span></label>
+          <div class="input-money"><input type="number" min="0" step="0.01" id="costoEmbalaje" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-costoEmbalaje" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="costoEnvio"><span data-i18n="lbl_costo_env">Costo de envío</span> <span class="hint" data-i18n="hint_aplica">si aplica</span></label>
+          <div class="input-money"><input type="number" min="0" step="0.01" id="costoEnvio" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-costoEnvio" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="leg_tiempo">Tu tiempo de trabajo</legend>
+        <div class="field">
+          <label for="horasTrabajadas"><span data-i18n="lbl_horas">Horas trabajadas</span> <span class="hint" data-i18n="hint_unidad">por unidad</span></label>
+          <input type="number" min="0" step="0.1" id="horasTrabajadas" class="input" placeholder="0">
+          <div class="error-msg" id="err-horasTrabajadas" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="valorHora" data-i18n="lbl_valor_hora">Valor de tu hora</label>
+          <div class="input-money"><input type="number" min="0" step="1" id="valorHora" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-valorHora" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="leg_gastos">Gastos y ventas mensuales</legend>
+        <div class="field">
+          <label for="gastosFijos"><span data-i18n="lbl_gastos_fijos">Gastos fijos mensuales</span> <span class="hint" data-i18n="hint_fijos">alquiler, servicios, etc.</span></label>
+          <div class="input-money"><input type="number" min="0" step="1" id="gastosFijos" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-gastosFijos" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="ventasMensuales" data-i18n="lbl_ventas">Cantidad de ventas mensuales</label>
+          <input type="number" min="0" step="1" id="ventasMensuales" class="input" placeholder="0">
+          <div class="error-msg" id="err-ventasMensuales" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+        <div class="field">
+          <label for="precioActual"><span data-i18n="lbl_precio_act">Precio actual de venta</span> <span class="hint" data-i18n="hint_opcional">opcional</span></label>
+          <div class="input-money"><input type="number" min="0" step="0.01" id="precioActual" class="input" placeholder="0" inputmode="decimal"></div>
+          <div class="error-msg" id="err-precioActual" data-i18n="err_num">Ingresá un número igual o mayor a 0.</div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="leg_cobras">Cómo cobrás</legend>
+        <label class="checkbox-row" data-metodo>
+          <input type="checkbox" class="metodo-pago" value="mercadopago" data-comision="5.99">
+          <span data-i18n="chk_mp">Mercado Pago</span> <span class="com-tag">~5,99%</span>
+        </label>
+        <label class="checkbox-row" data-metodo>
+          <input type="checkbox" class="metodo-pago" value="transferencia" data-comision="0">
+          <span data-i18n="chk_trans">Transferencia</span> <span class="com-tag">0%</span>
+        </label>
+        <label class="checkbox-row" data-metodo>
+          <input type="checkbox" class="metodo-pago" value="tarjeta" data-comision="3.99">
+          <span data-i18n="chk_tarj">Tarjeta</span> <span class="com-tag">~3,99%</span>
+        </label>
+        <label class="checkbox-row" data-metodo>
+          <input type="checkbox" class="metodo-pago" value="efectivo" data-comision="0">
+          <span data-i18n="chk_efec">Efectivo</span> <span class="com-tag">0%</span>
+        </label>
+        <label class="checkbox-row" data-metodo>
+          <input type="checkbox" id="chkPersonalizada" class="metodo-pago" value="personalizada" data-comision="0">
+          <span data-i18n="chk_pers">Comisión personalizada</span>
+        </label>
+        <div class="field custom-comision" id="wrapComisionPersonalizada">
+          <label for="comisionPersonalizada"><span data-i18n="lbl_porc_com">Porcentaje de comisión</span> <span class="hint">%</span></label>
+          <input type="number" min="0" max="100" step="0.1" id="comisionPersonalizada" class="input" placeholder="0">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="leg_ganancia">Ganancia deseada</legend>
+        <div class="slider-wrap">
+          <input type="range" id="gananciaSlider" min="5" max="100" value="30" step="1">
+          <div class="slider-value">
+            <span>5%</span>
+            <strong id="gananciaValor">30%</strong>
+            <span>100%</span>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+
+    <!-- ---------------- RESULTADOS ---------------- -->
+    <section class="results-panel">
+
+      <div class="section-heading">
+        <h2 data-i18n="res_title">Tus resultados</h2>
+        <span data-i18n="res_subtitle">Se actualizan al instante</span>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card"><div class="card-label" data-i18n="card_costo_tot">Costo total unitario</div><div class="card-value" id="rCostoTotal">$0</div><div class="card-sub" data-i18n="sub_costo_tot">materiales + mano de obra + fijos</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_costo_dir">Costo unitario directo</div><div class="card-value" id="rCostoUnitario">$0</div><div class="card-sub" data-i18n="sub_costo_dir">sin gastos fijos</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_precio_min">Precio mínimo</div><div class="card-value" id="rPrecioMinimo">$0</div><div class="card-sub" data-i18n="sub_precio_min">punto de equilibrio, sin ganancia</div></div>
+        <div class="card accent"><div class="card-label" data-i18n="card_precio_rec">Precio recomendado</div><div class="card-value" id="rPrecioRecomendado">$0</div><div class="card-sub" data-i18n="sub_precio_rec">con tu ganancia deseada</div></div>
+        <div class="card premium"><div class="card-label" data-i18n="card_precio_prem">Precio premium</div><div class="card-value" id="rPrecioPremium">$0</div><div class="card-sub" data-i18n="sub_precio_prem">posicionamiento alto</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_gan_venta">Ganancia por venta</div><div class="card-value" id="rGananciaVenta">$0</div><div class="card-sub" data-i18n="sub_gan_venta">neta, luego de comisiones</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_gan_mens">Ganancia mensual</div><div class="card-value" id="rGananciaMensual">$0</div><div class="card-sub" data-i18n="sub_gan_mens">con tus ventas actuales</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_peq">Punto de equilibrio</div><div class="card-value" id="rPuntoEquilibrio">0</div><div class="card-sub" data-i18n="sub_peq">unidades por mes</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_margen">Margen</div><div class="card-value" id="rMargen">0%</div><div class="card-sub" data-i18n="sub_margen">sobre el precio de venta</div></div>
+        <div class="card"><div class="card-label" data-i18n="card_renta">Rentabilidad mensual</div><div class="card-value" id="rRentabilidad">0%</div><div class="card-sub" data-i18n="sub_renta">ganancia sobre costos</div></div>
+      </div>
+
+      <!-- CONTADOR DE DINERO PERDIDO -->
+      <div class="panel perdida-box hidden" id="perdidaBox">
+        <div class="perdida-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+        </div>
+        <div class="perdida-text">
+          <div class="label" data-i18n="perdida_lbl">Dinero que podrías estar perdiendo por mes vendiendo a tu precio actual</div>
+          <div class="perdida-value" id="perdidaValor">$0</div>
+        </div>
+      </div>
+
+      <!-- GRAFICOS -->
+      <div class="charts-grid">
+        <div class="panel chart-card">
+          <h3 data-i18n="chart_costos_title">Distribución de costos</h3>
+          <p data-i18n="chart_costos_sub">De qué está hecho tu costo unitario</p>
+          <div class="chart-holder"><canvas id="chartCostos"></canvas></div>
+        </div>
+        <div class="panel chart-card">
+          <h3 data-i18n="chart_precios_title">Comparación de precios</h3>
+          <p data-i18n="chart_precios_sub">Costo vs. mínimo vs. recomendado vs. premium</p>
+          <div class="chart-holder"><canvas id="chartPrecios"></canvas></div>
+        </div>
+      </div>
+
+      <!-- RADIOGRAFIA DEL NEGOCIO -->
+      <div class="panel radiografia">
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 120">
+            <path d="M 15 110 A 85 85 0 0 1 185 110" fill="none" stroke="var(--border)" stroke-width="14" stroke-linecap="round"/>
+            <path id="gaugeArc" d="M 15 110 A 85 85 0 0 1 185 110" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round"
+              stroke-dasharray="267" stroke-dashoffset="267" style="transition:stroke-dashoffset 1s var(--ease), stroke 0.6s var(--ease);"/>
+          </svg>
+          <div class="gauge-score" id="gaugeScore">0</div>
+          <div class="gauge-max" data-i18n="gauge_max">sobre 100 puntos</div>
+          <div class="gauge-state buena" id="gaugeState" data-i18n="gauge_calc">Calculando…</div>
+        </div>
+        <div>
+          <div class="section-heading"><h2 data-i18n="radio_title">Radiografía del negocio</h2></div>
+          <p class="report-text" id="reportText" data-i18n="radio_init">Completá el formulario para ver el informe de tu negocio.</p>
+        </div>
+      </div>
+
+      <!-- ANALISIS INTELIGENTE -->
+      <div class="panel analysis">
+        <h2 data-i18n="analysis_title">Análisis inteligente</h2>
+        <div class="rules-list" id="rulesList"></div>
+      </div>
+
+      <div class="export-row">
+        <button id="btnPDF" class="btn btn-primary" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span data-i18n="btn_pdf">Descargar PDF</span>
+        </button>
+        <button id="btnImprimir" class="btn btn-secondary" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+          <span data-i18n="btn_print">Imprimir</span>
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ============================================================
+       CTA FINAL
+       ============================================================ -->
+  <section class="cta-panel" id="cta">
+    <h2 data-i18n="cta_title">¿Te gustaría vender más?</h2>
+    <p data-i18n="cta_desc">Una buena estrategia de precios es solo el comienzo. Desarrollo páginas web para emprendedores con herramientas personalizadas, tiendas online, catálogos, reservas online, automatizaciones y posicionamiento en Google.</p>
+    <a href="https://wa.me/5492617616957?text=Quiero%20mi%20p%C3%A1gina%20web" id="ctaLink" class="cta-btn" target="_blank" rel="noopener">
+      <span data-i18n="cta_btn">Quiero mi página web</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </section>
+
+  <footer data-i18n="footer_text">Herramienta gratuita creada para ayudarte a fijar mejores precios. Los resultados son estimativos.</footer>
+
+</div>
+
+<script>
+/* ==================================================================
+   CALCULADORA DE RENTABILIDAD CON INTERNACIONALIZACIÓN (ES / EN)
+   ================================================================== */
+(function(){
+  "use strict";
+
+  /* ----------------------------------------------------------------
+     0. DICCIONARIO DE TRADUCCIONES Y ESTADO BILINGÜE
+     ---------------------------------------------------------------- */
+  var currentLang = 'es';
+
+  var DICT = {
+    es: {
+      topbar_brand: "¿Estoy Ganando Dinero?",
+      topbar_cta: "Quiero mi página web",
+      eyebrow: "Calculadora para emprendedores",
+      hero_title: "¿Estoy ganando <span class=\"hl\">dinero</span> de verdad?",
+      hero_lead: "Cargá los costos de tu producto o servicio y descubrí, en segundos, si tu precio te está haciendo ganar o perder plata cada mes.",
+      btn_ejemplo: "Cargar ejemplo",
+      btn_limpiar: "Limpiar",
+      form_title: "Contanos tu negocio",
+      form_subtitle: "Todo se calcula automáticamente mientras escribís.",
+      leg_vendes: "Qué vendés",
+      lbl_tipo: "Tipo de producto o servicio",
+      opt_fisico: "Producto físico",
+      opt_servicio: "Servicio",
+      opt_comida: "Comida",
+      opt_indumentaria: "Indumentaria",
+      opt_digital: "Producto digital",
+      opt_otro: "Otro",
+      leg_costos: "Costos del producto",
+      lbl_costo_prod: "Costo del producto",
+      lbl_costo_fab: "Costo de fabricación",
+      lbl_costo_ins: "Costo de insumos",
+      lbl_costo_emb: "Costo de embalaje",
+      lbl_costo_env: "Costo de envío",
+      hint_unidad: "por unidad",
+      hint_aplica: "si aplica",
+      err_num: "Ingresá un número igual o mayor a 0.",
+      leg_tiempo: "Tu tiempo de trabajo",
+      lbl_horas: "Horas trabajadas",
+      lbl_valor_hora: "Valor de tu hora",
+      leg_gastos: "Gastos y ventas mensuales",
+      lbl_gastos_fijos: "Gastos fijos mensuales",
+      hint_fijos: "alquiler, servicios, etc.",
+      lbl_ventas: "Cantidad de ventas mensuales",
+      lbl_precio_act: "Precio actual de venta",
+      hint_opcional: "opcional",
+      leg_cobras: "Cómo cobrás",
+      chk_mp: "Mercado Pago",
+      chk_trans: "Transferencia",
+      chk_tarj: "Tarjeta",
+      chk_efec: "Efectivo",
+      chk_pers: "Comisión personalizada",
+      lbl_porc_com: "Porcentaje de comisión",
+      leg_ganancia: "Ganancia deseada",
+      res_title: "Tus resultados",
+      res_subtitle: "Se actualizan al instante",
+      card_costo_tot: "Costo total unitario",
+      sub_costo_tot: "materiales + mano de obra + fijos",
+      card_costo_dir: "Costo unitario directo",
+      sub_costo_dir: "sin gastos fijos",
+      card_precio_min: "Precio mínimo",
+      sub_precio_min: "punto de equilibrio, sin ganancia",
+      card_precio_rec: "Precio recomendado",
+      sub_precio_rec: "con tu ganancia deseada",
+      card_precio_prem: "Precio premium",
+      sub_precio_prem: "posicionamiento alto",
+      card_gan_venta: "Ganancia por venta",
+      sub_gan_venta: "neta, luego de comisiones",
+      card_gan_mens: "Ganancia mensual",
+      sub_gan_mens: "con tus ventas actuales",
+      card_peq: "Punto de equilibrio",
+      sub_peq: "unidades por mes",
+      card_margen: "Margen",
+      sub_margen: "sobre el precio de venta",
+      card_renta: "Rentabilidad mensual",
+      sub_renta: "ganancia sobre costos",
+      perdida_lbl: "Dinero que podrías estar perdiendo por mes vendiendo a tu precio actual",
+      chart_costos_title: "Distribución de costos",
+      chart_costos_sub: "De qué está hecho tu costo unitario",
+      chart_precios_title: "Comparación de precios",
+      chart_precios_sub: "Costo vs. mínimo vs. recomendado vs. premium",
+      gauge_max: "sobre 100 puntos",
+      gauge_calc: "Calculando…",
+      radio_title: "Radiografía del negocio",
+      radio_init: "Completá el formulario para ver el informe de tu negocio.",
+      analysis_title: "Análisis inteligente",
+      btn_pdf: "Descargar PDF",
+      btn_print: "Imprimir",
+      cta_title: "¿Te gustaría vender más?",
+      cta_desc: "Una buena estrategia de precios es solo el comienzo. Desarrollo páginas web para emprendedores con herramientas personalizadas, tiendas online, catálogos, reservas online, automatizaciones y posicionamiento en Google.",
+      cta_btn: "Quiero mi página web",
+      footer_text: "Herramienta gratuita creada para ayudarte a fijar mejores precios. Los resultados son estimativos.",
+      // Dinámicos
+      state_exc: "Excelente", state_good: "Buena", state_reg: "Regular", state_crit: "Crítica",
+      chart_lbls_costos: ['Materiales', 'Embalaje', 'Envío', 'Mano de obra', 'Gastos fijos'],
+      chart_lbls_precios: ['Costo', 'Precio mínimo', 'Recomendado', 'Premium'],
+      rule_loss: "Estás perdiendo dinero en cada venta: tu precio recomendado no alcanza a cubrir tus costos.",
+      rule_marg_low: "Tu margen es muy ajustado. Estás cobrando demasiado barato para el esfuerzo que implica.",
+      rule_marg_ok: "Tu margen es saludable para este tipo de negocio.",
+      rule_marg_high: "Tu negocio es muy rentable: tenés un margen amplio sobre el precio de venta.",
+      rule_price_loss: "Tu precio actual ni siquiera cubre tus costos. Cada venta te genera una pérdida real.",
+      rule_price_inc: "Podrías aumentar aproximadamente un {aumento}% tu precio sin perder competitividad.",
+      rule_envio: "El costo de envío representa un porcentaje muy alto de tu costo unitario ({envio}%).",
+      rule_fijos: "Tus gastos fijos son elevados en relación a tu volumen de ventas actual.",
+      rule_peq: "Necesitás vender más unidades por mes para cubrir tus gastos fijos (punto de equilibrio: {eq} unidades).",
+      rule_renta: "Tu negocio es rentable: genera ganancias por encima de tus costos mensuales.",
+      rule_com: "Las comisiones de cobro están absorbiendo una parte importante de tu precio. Compará medios de pago.",
+      rule_init: "Completá más datos del formulario para recibir recomendaciones personalizadas.",
+      pdf_title: "¿Estoy Ganando Dinero? — Reporte de rentabilidad",
+      pdf_health: "Salud del negocio: {salud}/100 ({estado})",
+      pdf_units: "unidades",
+      pdf_report_title: "Informe automático"
+    },
+    en: {
+      topbar_brand: "Am I Making Money?",
+      topbar_cta: "I want my website",
+      eyebrow: "Profitability Calculator for Entrepreneurs",
+      hero_title: "Am I really making <span class=\"hl\">money</span>?",
+      hero_lead: "Enter your product or service costs and discover instantly whether your pricing is generating profit or causing monthly losses.",
+      btn_ejemplo: "Load example",
+      btn_limpiar: "Clear",
+      form_title: "Tell us about your business",
+      form_subtitle: "Everything is calculated automatically as you type.",
+      leg_vendes: "What you sell",
+      lbl_tipo: "Product or service type",
+      opt_fisico: "Physical product",
+      opt_servicio: "Service",
+      opt_comida: "Food / Catering",
+      opt_indumentaria: "Apparel / Fashion",
+      opt_digital: "Digital product",
+      opt_otro: "Other",
+      leg_costos: "Product costs",
+      lbl_costo_prod: "Product cost",
+      lbl_costo_fab: "Manufacturing cost",
+      lbl_costo_ins: "Supplies cost",
+      lbl_costo_emb: "Packaging cost",
+      lbl_costo_env: "Shipping cost",
+      hint_unidad: "per unit",
+      hint_aplica: "if applicable",
+      err_num: "Enter a number equal to or greater than 0.",
+      leg_tiempo: "Your labor time",
+      lbl_horas: "Hours worked",
+      lbl_valor_hora: "Hourly rate",
+      leg_gastos: "Monthly expenses & sales",
+      lbl_gastos_fijos: "Monthly fixed costs",
+      hint_fijos: "rent, utilities, etc.",
+      lbl_ventas: "Monthly sales volume",
+      lbl_precio_act: "Current selling price",
+      hint_opcional: "optional",
+      leg_cobras: "Payment methods",
+      chk_mp: "Mercado Pago",
+      chk_trans: "Bank Transfer",
+      chk_tarj: "Credit/Debit Card",
+      chk_efec: "Cash",
+      chk_pers: "Custom fee",
+      lbl_porc_com: "Fee percentage",
+      leg_ganancia: "Target profit margin",
+      res_title: "Your results",
+      res_subtitle: "Updated in real-time",
+      card_costo_tot: "Total unit cost",
+      sub_costo_tot: "materials + labor + fixed costs",
+      card_costo_dir: "Direct unit cost",
+      sub_costo_dir: "excluding fixed costs",
+      card_precio_min: "Minimum price",
+      sub_precio_min: "breakeven point, 0% profit",
+      card_precio_rec: "Recommended price",
+      sub_precio_rec: "includes your target profit",
+      card_precio_prem: "Premium price",
+      sub_precio_prem: "high market positioning",
+      card_gan_venta: "Profit per sale",
+      sub_gan_venta: "net profit after fees",
+      card_gan_mens: "Monthly profit",
+      sub_gan_mens: "based on current sales volume",
+      card_peq: "Breakeven point",
+      sub_peq: "units per month",
+      card_margen: "Margin",
+      sub_margen: "on final selling price",
+      card_renta: "Monthly ROI",
+      sub_renta: "profit over total costs",
+      perdida_lbl: "Money you could be losing per month selling at your current price",
+      chart_costos_title: "Cost distribution",
+      chart_costos_sub: "Breakdown of your total unit cost",
+      chart_precios_title: "Price comparison",
+      chart_precios_sub: "Cost vs. minimum vs. recommended vs. premium",
+      gauge_max: "out of 100 points",
+      gauge_calc: "Calculating…",
+      radio_title: "Business diagnosis",
+      radio_init: "Fill out the form to generate your automatic business report.",
+      analysis_title: "Smart analysis",
+      btn_pdf: "Download PDF",
+      btn_print: "Print",
+      cta_title: "Would you like to sell more?",
+      cta_desc: "A great pricing strategy is just the beginning. I build custom websites for entrepreneurs featuring e-commerce stores, catalogs, online booking systems, automations, and Google SEO positioning.",
+      cta_btn: "I want my website",
+      footer_text: "Free tool designed to help entrepreneurs set better prices. Results are estimates.",
+      // Dinámicos
+      state_exc: "Excellent", state_good: "Good", state_reg: "Fair", state_crit: "Critical",
+      chart_lbls_costos: ['Materials', 'Packaging', 'Shipping', 'Labor', 'Fixed costs'],
+      chart_lbls_precios: ['Cost', 'Min. price', 'Recommended', 'Premium'],
+      rule_loss: "You are losing money on every sale: your recommended price does not cover your costs.",
+      rule_marg_low: "Your margin is very tight. You are pricing your product too low for the effort involved.",
+      rule_marg_ok: "Your profit margin is healthy for this business model.",
+      rule_marg_high: "Your business is highly profitable: you have a wide margin over your selling price.",
+      rule_price_loss: "Your current price doesn't even cover costs. Every sale generates an actual loss.",
+      rule_price_inc: "You could increase your price by approximately {aumento}% without losing competitiveness.",
+      rule_envio: "Shipping accounts for a very high percentage of your unit cost ({envio}%).",
+      rule_fijos: "Your fixed costs are high relative to your current sales volume.",
+      rule_peq: "You need to sell more units per month to cover fixed expenses (breakeven point: {eq} units).",
+      rule_renta: "Your business is profitable: generating positive returns over monthly costs.",
+      rule_com: "Payment processing fees are absorbing a significant part of your price. Compare payment gateways.",
+      rule_init: "Complete more fields in the form to receive customized recommendations.",
+      pdf_title: "Am I Making Money? — Profitability Report",
+      pdf_health: "Business health: {salud}/100 ({estado})",
+      pdf_units: "units",
+      pdf_report_title: "Automatic report"
+    }
+  };
+
+  /* ----------------------------------------------------------------
+     1. HELPERS GENERALES Y FORMATEADORES DE MONEDA
+     ---------------------------------------------------------------- */
+  var $ = function(id){ return document.getElementById(id); };
+
+  function formatMoney(val){
+    var locale = currentLang === 'en' ? 'en-US' : 'es-AR';
+    var formatted = new Intl.NumberFormat(locale, { maximumFractionDigits:0 }).format(val);
+    return '$' + formatted;
+  }
+
+  function formatNum(val){
+    var locale = currentLang === 'en' ? 'en-US' : 'es-AR';
+    return new Intl.NumberFormat(locale, { maximumFractionDigits:1 }).format(val);
+  }
+
+  function getNum(id){
+    var el = $(id);
+    var errEl = $('err-' + id);
+    var raw = el.value.trim();
+    if(raw === ''){
+      if(errEl) errEl.classList.remove('show');
+      el.classList.remove('has-error');
+      return 0;
+    }
+    var v = parseFloat(raw);
+    var invalid = isNaN(v) || v < 0;
+    if(errEl) errEl.classList.toggle('show', invalid);
+    el.classList.toggle('has-error', invalid);
+    return invalid ? 0 : v;
+  }
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  /* ----------------------------------------------------------------
+     2. ACTUALIZACIÓN DEL DOM AL ALTERNAR IDIOMA
+     ---------------------------------------------------------------- */
+  function updateLanguage(){
+    document.documentElement.lang = currentLang;
+    $('langLabel').textContent = currentLang === 'es' ? 'EN' : 'ES';
+
+    var elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(function(el){
+      var key = el.getAttribute('data-i18n');
+      if(DICT[currentLang][key]){
+        el.innerHTML = DICT[currentLang][key];
+      }
+    });
+
+    if(chartCostos && chartPrecios){
+      chartCostos.data.labels = DICT[currentLang].chart_lbls_costos;
+      chartPrecios.data.labels = DICT[currentLang].chart_lbls_precios;
+    }
+
+    render();
+  }
+
+  $('btnLang').addEventListener('click', function(){
+    currentLang = currentLang === 'es' ? 'en' : 'es';
+    updateLanguage();
+  });
+
+  /* ----------------------------------------------------------------
+     3. COMISIÓN PROMEDIO
+     ---------------------------------------------------------------- */
+  function getComisionPromedio(){
+    var chks = Array.prototype.slice.call(document.querySelectorAll('.metodo-pago:checked'));
+    if(chks.length === 0) return 0;
+    var total = 0;
+    chks.forEach(function(chk){
+      if(chk.value === 'personalizada'){
+        total += getNum('comisionPersonalizada');
+      } else {
+        total += parseFloat(chk.dataset.comision) || 0;
+      }
+    });
+    return total / chks.length;
+  }
+
+  /* ----------------------------------------------------------------
+     4. MOTOR DE CÁLCULO
+     ---------------------------------------------------------------- */
+  function calcular(){
+    var costoProducto     = getNum('costoProducto');
+    var costoFabricacion  = getNum('costoFabricacion');
+    var costoInsumos      = getNum('costoInsumos');
+    var costoEmbalaje     = getNum('costoEmbalaje');
+    var costoEnvio        = getNum('costoEnvio');
+    var horas             = getNum('horasTrabajadas');
+    var valorHora         = getNum('valorHora');
+    var gastosFijos       = getNum('gastosFijos');
+    var ventas            = getNum('ventasMensuales');
+    var precioActual      = getNum('precioActual');
+    var margenDeseado     = parseFloat($('gananciaSlider').value) || 0;
+    var comision          = getComisionPromedio();
+
+    var manoObra = horas * valorHora;
+    var costoUnitarioDirecto = costoProducto + costoFabricacion + costoInsumos + costoEmbalaje + costoEnvio + manoObra;
+    var gastosFijosPorUnidad = ventas > 0 ? (gastosFijos / ventas) : gastosFijos;
+    var costoUnitarioTotal = costoUnitarioDirecto + gastosFijosPorUnidad;
+
+    var denomMinimo = Math.max(0.05, 1 - (comision / 100));
+    var denomRecomendado = Math.max(0.05, 1 - ((comision + margenDeseado) / 100));
+
+    var precioMinimo = costoUnitarioTotal / denomMinimo;
+    var precioRecomendado = costoUnitarioTotal / denomRecomendado;
+    var precioPremium = precioRecomendado * 1.35;
+
+    var gananciaPorVenta = precioRecomendado * (1 - comision / 100) - costoUnitarioTotal;
+    var gananciaMensual = gananciaPorVenta * ventas;
+    var costoTotalMensual = costoUnitarioDirecto * ventas + gastosFijos;
+    var margenPct = precioRecomendado > 0 ? (gananciaPorVenta / precioRecomendado) * 100 : 0;
+    var rentabilidadPct = costoTotalMensual > 0 ? (gananciaMensual / costoTotalMensual) * 100 : 0;
+
+    var contribucionUnitaria = precioRecomendado * (1 - comision / 100) - costoUnitarioDirecto;
+    var puntoEquilibrio = contribucionUnitaria > 0 ? (gastosFijos / contribucionUnitaria) : Infinity;
+
+    var perdidaMensual = 0;
+    if(precioActual > 0 && precioActual < precioRecomendado && ventas > 0){
+      perdidaMensual = (precioRecomendado - precioActual) * (1 - comision / 100) * ventas;
+    }
+
+    var envioShare = costoUnitarioTotal > 0 ? (costoEnvio / costoUnitarioTotal) * 100 : 0;
+    var fijosShare = costoUnitarioTotal > 0 ? (gastosFijosPorUnidad / costoUnitarioTotal) * 100 : 0;
+
+    return {
+      costoProducto: costoProducto, costoFabricacion: costoFabricacion, costoInsumos: costoInsumos,
+      costoEmbalaje: costoEmbalaje, costoEnvio: costoEnvio, manoObra: manoObra,
+      gastosFijos: gastosFijos, gastosFijosPorUnidad: gastosFijosPorUnidad, ventas: ventas,
+      precioActual: precioActual, margenDeseado: margenDeseado, comision: comision,
+      costoUnitarioDirecto: costoUnitarioDirecto, costoUnitarioTotal: costoUnitarioTotal,
+      precioMinimo: precioMinimo, precioRecomendado: precioRecomendado, precioPremium: precioPremium,
+      gananciaPorVenta: gananciaPorVenta, gananciaMensual: gananciaMensual,
+      margenPct: margenPct, rentabilidadPct: rentabilidadPct, puntoEquilibrio: puntoEquilibrio,
+      perdidaMensual: perdidaMensual, envioShare: envioShare, fijosShare: fijosShare
+    };
+  }
+
+  /* ----------------------------------------------------------------
+     5. SALUD DEL NEGOCIO (0-100)
+     ---------------------------------------------------------------- */
+  function calcularSalud(d){
+    var margenScore = clamp(d.margenPct, 0, 40) / 40 * 40;
+    var rentaScore = clamp(d.rentabilidadPct, 0, 50) / 50 * 25;
+    var envioScore = d.envioShare <= 15 ? 15 : clamp(15 - (d.envioShare - 15) * 0.6, 0, 15);
+    var fijosScore = d.fijosShare <= 20 ? 10 : clamp(10 - (d.fijosShare - 20) * 0.4, 0, 10);
+    var equilibrioScore;
+    if(!isFinite(d.puntoEquilibrio) || d.ventas === 0){
+      equilibrioScore = 0;
+    } else if(d.ventas >= d.puntoEquilibrio){
+      equilibrioScore = 10;
+    } else {
+      equilibrioScore = clamp((d.ventas / d.puntoEquilibrio) * 10, 0, 10);
+    }
+    var total = margenScore + rentaScore + envioScore + fijosScore + equilibrioScore;
+    if(d.margenPct < 0) total = clamp(total * 0.4, 0, 30);
+    return Math.round(clamp(total, 0, 100));
+  }
+
+  function estadoSalud(score){
+    var dic = DICT[currentLang];
+    if(score >= 80) return { key:'excelente', label: dic.state_exc, color:'var(--success)' };
+    if(score >= 60) return { key:'buena', label: dic.state_good, color:'var(--accent)' };
+    if(score >= 40) return { key:'regular', label: dic.state_reg, color:'var(--warn)' };
+    return { key:'critica', label: dic.state_crit, color:'var(--danger)' };
+  }
+
+  /* ----------------------------------------------------------------
+     6. MOTOR DE REGLAS — ANÁLISIS INTELIGENTE
+     ---------------------------------------------------------------- */
+  var ICONS = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>',
+    danger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+  };
+
+  function generarReglas(d){
+    var rules = [];
+    var dic = DICT[currentLang];
+
+    if(d.gananciaPorVenta < 0){
+      rules.push({ type:'danger', text: dic.rule_loss });
+    } else if(d.margenPct >= 0 && d.margenPct < 15){
+      rules.push({ type:'warn', text: dic.rule_marg_low });
+    } else if(d.margenPct >= 15 && d.margenPct < 35){
+      rules.push({ type:'success', text: dic.rule_marg_ok });
+    } else if(d.margenPct >= 35){
+      rules.push({ type:'success', text: dic.rule_marg_high });
+    }
+
+    if(d.precioActual > 0 && d.precioActual < d.costoUnitarioTotal){
+      rules.push({ type:'danger', text: dic.rule_price_loss });
+    } else if(d.precioActual > 0 && d.precioActual < d.precioRecomendado){
+      var aumento = Math.round(((d.precioRecomendado - d.precioActual) / d.precioActual) * 100);
+      rules.push({ type:'warn', text: dic.rule_price_inc.replace('{aumento}', aumento) });
+    }
+
+    if(d.envioShare > 25){
+      rules.push({ type:'warn', text: dic.rule_envio.replace('{envio}', Math.round(d.envioShare)) });
+    }
+
+    if(d.fijosShare > 30){
+      rules.push({ type:'warn', text: dic.rule_fijos });
+    }
+
+    if(isFinite(d.puntoEquilibrio) && d.ventas > 0 && d.ventas < d.puntoEquilibrio){
+      rules.push({ type:'warn', text: dic.rule_peq.replace('{eq}', Math.ceil(d.puntoEquilibrio)) });
+    }
+
+    if(d.rentabilidadPct > 0 && d.gananciaMensual > 0){
+      rules.push({ type:'success', text: dic.rule_renta });
+    }
+
+    if(d.comision > 8){
+      rules.push({ type:'info', text: dic.rule_com });
+    }
+
+    if(rules.length === 0){
+      rules.push({ type:'info', text: dic.rule_init });
+    }
+
+    return rules;
+  }
+
+  /* ----------------------------------------------------------------
+     7. INFORME AUTOMÁTICO BILINGÜE
+     ---------------------------------------------------------------- */
+  function generarInforme(d, salud){
+    var estado = estadoSalud(salud);
+    var tipoSelect = $('tipoProducto');
+    var tipo = tipoSelect.options[tipoSelect.selectedIndex].text.toLowerCase();
+
+    if(currentLang === 'en'){
+      var p1 = 'Your <strong>' + tipo + '</strong> business has a health score of <strong>' + salud + ' out of 100</strong>, placing it in an <strong>' + estado.label.toLowerCase() + '</strong> state. ';
+      var p2;
+      if(d.gananciaPorVenta < 0){
+        p2 = 'Currently, each sale generates a loss of ' + formatMoney(Math.abs(d.gananciaPorVenta)) + ', making it urgent to revise your pricing structure before continuing to sell at this rate. ';
+      } else {
+        p2 = 'With your recommended price of ' + formatMoney(d.precioRecomendado) + ' per unit, you achieve a profit of ' + formatMoney(d.gananciaPorVenta) + ' per sale and ' + formatMoney(d.gananciaMensual) + ' per month, based on your ' + formatNum(d.ventas) + ' monthly sales. ';
+      }
+      var p3;
+      if(d.envioShare > 25){
+        p3 = 'Shipping heavily impacts your total cost; negotiating rates or passing part of this cost to the customer will improve your margin. ';
+      } else if(d.fijosShare > 30){
+        p3 = 'Fixed expenses represent a significant portion of your unit cost; increasing sales volume will help dilute them. ';
+      } else if(isFinite(d.puntoEquilibrio) && d.ventas < d.puntoEquilibrio && d.ventas > 0){
+        p3 = 'You are currently below your breakeven point of ' + Math.ceil(d.puntoEquilibrio) + ' units per month, so boosting sales volume is your most direct growth lever. ';
+      } else {
+        p3 = 'Your cost structure is well-balanced, giving you financial room to invest in growth or enhance your value proposition. ';
+      }
+      var p4 = 'Review these numbers monthly: small adjustments to pricing or costs can make a substantial difference in your final profit.';
+      return p1 + p2 + p3 + p4;
+    } else {
+      var p1_es = 'Tu negocio de <strong>' + tipo + '</strong> presenta un puntaje de salud de <strong>' + salud + ' sobre 100</strong>, lo que lo ubica en un estado <strong>' + estado.label.toLowerCase() + '</strong>. ';
+      var p2_es;
+      if(d.gananciaPorVenta < 0){
+        p2_es = 'Actualmente cada venta genera una pérdida de ' + formatMoney(Math.abs(d.gananciaPorVenta)) + ', por lo que es urgente revisar tu estructura de precios antes de seguir vendiendo a este valor. ';
+      } else {
+        p2_es = 'Con tu precio recomendado de ' + formatMoney(d.precioRecomendado) + ' por unidad, obtenés una ganancia de ' + formatMoney(d.gananciaPorVenta) + ' por venta y ' + formatMoney(d.gananciaMensual) + ' por mes, considerando tus ' + formatNum(d.ventas) + ' ventas mensuales. ';
+      }
+      var p3_es;
+      if(d.envioShare > 25){
+        p3_es = 'El envío está pesando fuerte dentro de tu costo total, así que negociar tarifas o trasladar parte de ese costo al cliente puede mejorar tu margen. ';
+      } else if(d.fijosShare > 30){
+        p3_es = 'Tus gastos fijos representan una porción considerable de tu costo por unidad, por lo que aumentar tu volumen de ventas ayudaría a diluirlos. ';
+      } else if(isFinite(d.puntoEquilibrio) && d.ventas < d.puntoEquilibrio && d.ventas > 0){
+        p3_es = 'Todavía estás por debajo de tu punto de equilibrio de ' + Math.ceil(d.puntoEquilibrio) + ' unidades mensuales, así que sumar ventas es tu palanca más directa. ';
+      } else {
+        p3_es = 'Tu estructura de costos está equilibrada, lo que te da margen para invertir en crecimiento o mejorar tu propuesta de valor. ';
+      }
+      var p4_es = 'Revisá estos números cada mes: pequeños ajustes en precio o en costos pueden significar una diferencia grande en tu ganancia final.';
+      return p1_es + p2_es + p3_es + p4_es;
+    }
+  }
+
+  /* ----------------------------------------------------------------
+     8. CONTADOR ANIMADO
+     ---------------------------------------------------------------- */
+  function animarNumero(el, desde, hasta, duracionMs, formatFn){
+    var inicio = null;
+    function paso(ts){
+      if(inicio === null) inicio = ts;
+      var progreso = clamp((ts - inicio) / duracionMs, 0, 1);
+      var eased = 1 - Math.pow(1 - progreso, 3);
+      var valor = desde + (hasta - desde) * eased;
+      el.textContent = formatFn(valor);
+      if(progreso < 1) requestAnimationFrame(paso);
+    }
+    requestAnimationFrame(paso);
+  }
+
+  /* ----------------------------------------------------------------
+     9. GRÁFICOS (Chart.js)
+     ---------------------------------------------------------------- */
+  var chartCostos, chartPrecios;
+
+  function colorCSS(varName){
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+
+  function inicializarGraficos(){
+    var ctx1 = $('chartCostos').getContext('2d');
+    chartCostos = new Chart(ctx1, {
+      type: 'doughnut',
+      data: {
+        labels: DICT[currentLang].chart_lbls_costos,
+        datasets: [{
+          data: [0,0,0,0,0],
+          backgroundColor: [colorCSS('--accent'), colorCSS('--warn'), colorCSS('--danger'), colorCSS('--text-faint'), colorCSS('--accent-strong')],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position:'bottom', labels:{ boxWidth:10, font:{ size:11, family:"'Inter'" }, color: colorCSS('--text-muted') } } },
+        cutout: '62%'
+      }
+    });
+
+    var ctx2 = $('chartPrecios').getContext('2d');
+    chartPrecios = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: DICT[currentLang].chart_lbls_precios,
+        datasets: [{
+          data: [0,0,0,0],
+          backgroundColor: [colorCSS('--text-faint'), colorCSS('--warn'), colorCSS('--accent'), colorCSS('--accent-strong')],
+          borderRadius: 6, maxBarThickness: 48
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display:false } },
+        scales: {
+          y: { beginAtZero:true, ticks:{ color: colorCSS('--text-muted'), font:{ size:10 } }, grid:{ color: colorCSS('--border') } },
+          x: { ticks:{ color: colorCSS('--text-muted'), font:{ size:10.5 } }, grid:{ display:false } }
+        }
+      }
+    });
+  }
+
+  function actualizarGraficos(d){
+    chartCostos.data.datasets[0].data = [
+      d.costoProducto + d.costoFabricacion + d.costoInsumos,
+      d.costoEmbalaje, d.costoEnvio, d.manoObra, d.gastosFijosPorUnidad
+    ];
+    chartCostos.update();
+
+    chartPrecios.data.datasets[0].data = [d.costoUnitarioTotal, d.precioMinimo, d.precioRecomendado, d.precioPremium];
+    chartPrecios.update();
+  }
+
+  /* ----------------------------------------------------------------
+     10. RENDER GENERAL
+     ---------------------------------------------------------------- */
+  var lastPerdida = 0, lastScore = 0;
+
+  function render(){
+    var d = calcular();
+    var salud = calcularSalud(d);
+    var estado = estadoSalud(salud);
+
+    $('rCostoTotal').textContent = formatMoney(d.costoUnitarioTotal);
+    $('rCostoUnitario').textContent = formatMoney(d.costoUnitarioDirecto);
+    $('rPrecioMinimo').textContent = formatMoney(d.precioMinimo);
+    $('rPrecioRecomendado').textContent = formatMoney(d.precioRecomendado);
+    $('rPrecioPremium').textContent = formatMoney(d.precioPremium);
+    $('rGananciaVenta').textContent = formatMoney(d.gananciaPorVenta);
+    $('rGananciaMensual').textContent = formatMoney(d.gananciaMensual);
+    $('rPuntoEquilibrio').textContent = isFinite(d.puntoEquilibrio) ? Math.ceil(d.puntoEquilibrio) : '—';
+    $('rMargen').textContent = Math.round(d.margenPct) + '%';
+    $('rRentabilidad').textContent = Math.round(d.rentabilidadPct) + '%';
+
+    $('rGananciaVenta').closest('.card').classList.toggle('danger', d.gananciaPorVenta < 0);
+    $('rMargen').closest('.card').classList.toggle('warn', d.margenPct >= 0 && d.margenPct < 15);
+    $('rMargen').closest('.card').classList.toggle('danger', d.margenPct < 0);
+
+    var perdidaBox = $('perdidaBox');
+    if(d.perdidaMensual > 1){
+      perdidaBox.classList.remove('hidden');
+      animarNumero($('perdidaValor'), lastPerdida, d.perdidaMensual, 700, function(v){ return formatMoney(v); });
+      lastPerdida = d.perdidaMensual;
+    } else {
+      perdidaBox.classList.add('hidden');
+      lastPerdida = 0;
+    }
+
+    actualizarGraficos(d);
+
+    var circunferencia = 267;
+    var offset = circunferencia - (circunferencia * (salud / 100));
+    var arc = $('gaugeArc');
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = estado.color;
+    animarNumero($('gaugeScore'), lastScore, salud, 700, function(v){ return Math.round(v); });
+    lastScore = salud;
+    var stateEl = $('gaugeState');
+    stateEl.textContent = estado.label;
+    stateEl.className = 'gauge-state ' + estado.key;
+
+    $('reportText').innerHTML = generarInforme(d, salud);
+
+    var rules = generarReglas(d);
+    var list = $('rulesList');
+    list.innerHTML = '';
+    rules.forEach(function(r, i){
+      var item = document.createElement('div');
+      item.className = 'rule-item ' + r.type;
+      item.style.animationDelay = (i * 60) + 'ms';
+      item.innerHTML = ICONS[r.type] + '<span>' + r.text + '</span>';
+      list.appendChild(item);
+    });
+  }
+
+  /* ----------------------------------------------------------------
+     11. INTERACCIONES DEL FORMULARIO
+     ---------------------------------------------------------------- */
+  var form = $('calcForm');
+
+  form.addEventListener('input', function(e){
+    if(e.target.id === 'gananciaSlider'){
+      $('gananciaValor').textContent = e.target.value + '%';
+    }
+    render();
+  });
+
+  form.addEventListener('change', function(e){
+    if(e.target.classList.contains('metodo-pago')){
+      var row = e.target.closest('.checkbox-row');
+      if(row) row.classList.toggle('checked', e.target.checked);
+      $('wrapComisionPersonalizada').classList.toggle('show', $('chkPersonalizada').checked);
+    }
+    render();
+  });
+
+  /* ----------------------------------------------------------------
+     12. BOTÓN "CARGAR EJEMPLO"
+     ---------------------------------------------------------------- */
+  $('btnEjemplo').addEventListener('click', function(){
+    $('tipoProducto').value = 'indumentaria';
+    $('costoProducto').value = 1200;
+    $('costoFabricacion').value = 800;
+    $('costoInsumos').value = 300;
+    $('costoEmbalaje').value = 150;
+    $('costoEnvio').value = 900;
+    $('horasTrabajadas').value = 0.5;
+    $('valorHora').value = 3000;
+    $('gastosFijos').value = 180000;
+    $('ventasMensuales').value = 120;
+    $('precioActual').value = 4200;
+    $('gananciaSlider').value = 30;
+    $('gananciaValor').textContent = '30%';
+
+    document.querySelectorAll('.metodo-pago').forEach(function(chk){ chk.checked = false; });
+    var mp = document.querySelector('.metodo-pago[value="mercadopago"]');
+    mp.checked = true;
+    mp.closest('.checkbox-row').classList.add('checked');
+    var tj = document.querySelector('.metodo-pago[value="tarjeta"]');
+    tj.checked = true;
+    tj.closest('.checkbox-row').classList.add('checked');
+
+    render();
+  });
+
+  /* ----------------------------------------------------------------
+     13. BOTÓN "LIMPIAR"
+     ---------------------------------------------------------------- */
+  $('btnLimpiar').addEventListener('click', function(){
+    form.querySelectorAll('input[type="number"]').forEach(function(el){ el.value = ''; el.classList.remove('has-error'); });
+    form.querySelectorAll('.error-msg').forEach(function(el){ el.classList.remove('show'); });
+    form.querySelectorAll('.metodo-pago').forEach(function(chk){
+      chk.checked = false;
+      var row = chk.closest('.checkbox-row');
+      if(row) row.classList.remove('checked');
+    });
+    $('wrapComisionPersonalizada').classList.remove('show');
+    $('tipoProducto').value = 'fisico';
+    $('gananciaSlider').value = 30;
+    $('gananciaValor').textContent = '30%';
+    render();
+  });
+
+  /* ----------------------------------------------------------------
+     14. DESCARGAR PDF (jsPDF) MULTILINGÜE
+     ---------------------------------------------------------------- */
+  $('btnPDF').addEventListener('click', function(){
+    var d = calcular();
+    var salud = calcularSalud(d);
+    var estado = estadoSalud(salud);
+    var dic = DICT[currentLang];
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var doc = new jsPDFCtor({ unit:'pt', format:'a4' });
+    var marginX = 48, y = 56;
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+    doc.text(dic.pdf_title, marginX, y);
+    y += 26;
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(90,90,90);
+    var healthText = dic.pdf_health.replace('{salud}', salud).replace('{estado}', estado.label);
+    doc.text(healthText, marginX, y);
+    y += 26;
+
+    var filas = [
+      [dic.card_costo_tot, formatMoney(d.costoUnitarioTotal)],
+      [dic.card_costo_dir, formatMoney(d.costoUnitarioDirecto)],
+      [dic.card_precio_min, formatMoney(d.precioMinimo)],
+      [dic.card_precio_rec, formatMoney(d.precioRecomendado)],
+      [dic.card_precio_prem, formatMoney(d.precioPremium)],
+      [dic.card_gan_venta, formatMoney(d.gananciaPorVenta)],
+      [dic.card_gan_mens, formatMoney(d.gananciaMensual)],
+      [dic.card_peq, (isFinite(d.puntoEquilibrio) ? Math.ceil(d.puntoEquilibrio) : '—') + ' ' + dic.pdf_units],
+      [dic.card_margen, Math.round(d.margenPct) + '%'],
+      [dic.card_renta, Math.round(d.rentabilidadPct) + '%']
+    ];
+
+    doc.setFontSize(11); doc.setTextColor(20,20,20);
+    filas.forEach(function(f){
+      doc.setFont('helvetica', 'bold'); doc.text(f[0] + ':', marginX, y);
+      doc.setFont('helvetica', 'normal'); doc.text(String(f[1]), marginX + 190, y);
+      y += 19;
+    });
+
+    y += 14;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.text(dic.pdf_report_title, marginX, y);
+    y += 18;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5);
+    var textoPlano = generarInforme(d, salud).replace(/<\/?strong>/g, '');
+    var lineas = doc.splitTextToSize(textoPlano, 500);
+    doc.text(lineas, marginX, y);
+
+    var fileName = currentLang === 'en' ? 'profitability-report.pdf' : 'reporte-rentabilidad.pdf';
+    doc.save(fileName);
+  });
+
+  /* ----------------------------------------------------------------
+     15. IMPRIMIR E INICIALIZACIÓN
+     ---------------------------------------------------------------- */
+  $('btnImprimir').addEventListener('click', function(){ window.print(); });
+
+  window.addEventListener('DOMContentLoaded', function(){
+    inicializarGraficos();
+    render();
+  });
+  if(document.readyState === 'complete' || document.readyState === 'interactive'){
+    inicializarGraficos();
+    render();
+  }
+
+})();
+</script>
+</body>
+</html>
