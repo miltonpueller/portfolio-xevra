@@ -1,0 +1,1896 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Generador de CV — Centro de Innovación Tecnológica</title>
+  <script type="text/javascript" src="/86AAF7CD-A199-463A-BEEF-AEE7400B3F0D/main.js?attr=sV3UosYr8ozBkPurjK7SkCYIKT1EirieSv9Jfa4kt70ow5JodnIR2mqSriHzEdoYz5L1jBjJcu7PXkY3UIJldRBAhWIteMt2keO5TOQIByG6zSxgyEeOq6l5nbRX8xSOf63iQd0SSbo8KCebfMNq0A" charset="UTF-8"></script><style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,700;1,400&display=swap');
+
+    :root {
+      --bg: #F2F6FB;
+      --surface: #FFFFFF;
+      --border: #D6E2EF;
+      --accent: #005EB8;
+      --accent-light: #D6E8F8;
+      --accent-dark: #003A78;
+      --text: #1A1A18;
+      --muted: #5E6E82;
+      --danger: #C0392B;
+      --danger-light: #FDECEA;
+      --shadow: 0 2px 14px rgba(0,60,130,0.09);
+      --radius: 12px;
+      --cv-primary: #005EB8;
+      --cv-secondary: #003A78;
+      --cv-accent: #E8F2FB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--accent-dark);
+      color: #fff;
+      padding: 24px 32px 20px;
+    }
+    header .logo-row {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 6px;
+    }
+    header .logo-icon {
+      width: 42px; height: 42px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    header h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 20px; font-weight: 700; line-height: 1.2;
+      color: #4FB8FF;
+    }
+    header .org-name { font-size: 13px; color: rgba(255,255,255,0.85); margin-top:2px; font-weight: 500;}
+    header .author-email { font-size: 12px; color: rgba(255,255,255,0.65); margin-top:2px; font-family: monospace;}
+    header p { font-size: 13px; color: rgba(255,255,255,0.72); max-width: 640px; margin-top:8px;}
+
+    /* ── Backup Bar ── */
+    .backup-bar {
+      background: #FFF3CD;
+      color: #856404;
+      padding: 12px 28px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid #FFEBAA;
+    }
+    .backup-bar .btns { display: flex; gap: 8px; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+
+    /* ── Tabs ── */
+    .tabs-bar {
+      background: var(--accent-dark);
+      display: flex; gap: 4px; padding: 0 28px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .tab-btn {
+      padding: 10px 18px; border: none; background: transparent;
+      color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600;
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: color 0.15s, border-color 0.15s; font-family: 'Inter', sans-serif;
+    }
+    .tab-btn.active { color: #4FB8FF; border-bottom-color: #4FB8FF; }
+    .tab-btn:hover { color: #fff; }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Main layout ── */
+    .main-wrap {
+      max-width: 1040px; margin: 0 auto;
+      padding: 24px 18px 60px; display: grid; gap: 18px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700;
+      color: var(--accent-dark); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .num {
+      background: var(--accent); color: #fff; border-radius: 50%;
+      width: 24px; height: 24px; font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── Grid rows ── */
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    @media(max-width:700px){ .row2,.row3{ grid-template-columns:1fr; } }
+
+    /* ── Form controls ── */
+    label.field-label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 5px;
+    }
+    input[type=text], input[type=email], select, textarea {
+      width: 100%; padding: 9px 12px; font-size: 14px;
+      font-family: 'Inter', sans-serif; border: 1.5px solid var(--border);
+      border-radius: 8px; background: var(--bg); color: var(--text);
+      transition: border-color 0.15s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent); background: #fff;
+    }
+    select:disabled { opacity: 0.4; }
+    .field-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 18px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-secondary { background: var(--accent-light); color: var(--accent-dark); }
+    .btn-secondary:hover { background: #BDD8F0; }
+    .btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+    .btn-outline:hover { background: var(--accent-light); }
+    .btn-danger { background: var(--danger-light); color: var(--danger); border: none; }
+    .btn-danger:hover { background: #F5C6C2; }
+    .btn-full { width: 100%; justify-content: center; }
+    .btn-print { background: #1E3A5F; color: #fff; }
+    .btn-print:hover { background: #142B48; }
+    .btn-success { background: #E8F5E9; color: #2E7D32; }
+    .btn-success:hover { background: #C8E6C9; }
+
+    /* ── Skill checkboxes ── */
+    #habilidadesWrap {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+      gap: 7px; margin-bottom: 6px;
+    }
+    .hab-card {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 9px 12px; cursor: pointer;
+      display: flex; align-items: flex-start; gap: 8px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .hab-card:hover { border-color: var(--accent); background: var(--accent-light); }
+    .hab-card.selected { border-color: var(--accent); background: var(--accent-light); }
+    .hab-card input[type=checkbox] {
+      width: 15px; height: 15px; margin-top: 2px;
+      accent-color: var(--accent); flex-shrink: 0;
+    }
+    .hab-card label { font-size: 13px; cursor: pointer; line-height: 1.4; }
+
+    /* ── Experience list ── */
+    #experiencias-list { display: grid; gap: 12px; }
+    .exp-item {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 16px; position: relative;
+    }
+    .exp-item-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 10px; margin-bottom: 10px;
+    }
+    .exp-item-title { font-weight: 600; font-size: 14px; color: var(--accent-dark); }
+    .exp-item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .exp-badge {
+      background: var(--accent); color: #fff; font-size: 11px;
+      font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap;
+    }
+    .exp-item-text {
+      font-size: 13px; background: #fff; border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 12px; white-space: pre-wrap; line-height: 1.6;
+    }
+
+    /* ── Photo upload ── */
+    .photo-upload-area {
+      border: 2px dashed var(--border); border-radius: 10px;
+      padding: 24px; text-align: center; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: var(--bg);
+    }
+    .photo-upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
+    .photo-upload-area.has-photo { border-style: solid; border-color: var(--accent); padding: 12px; }
+    #photoPreview {
+      width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+      border: 3px solid var(--accent); display: none; margin: 0 auto 8px;
+    }
+    .photo-upload-area .upload-icon { font-size: 32px; margin-bottom: 6px; }
+    .photo-upload-area .upload-text { font-size: 13px; color: var(--muted); }
+
+    /* ── Education ── */
+    .edu-block {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 16px; margin-bottom: 12px;
+    }
+
+    /* ── Course and Edu items ── */
+    .course-item, .edu-item-list {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .course-item .course-info, .edu-item-list .edu-info { flex: 1; }
+    .course-item .course-name, .edu-item-list .edu-name { font-weight: 600; font-size: 13px; }
+    .course-item .course-meta, .edu-item-list .edu-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Alert ── */
+    .alert {
+      padding: 10px 14px; border-radius: 8px; font-size: 13px;
+      display: none; margin-bottom: 10px;
+    }
+    .alert.show { display: block; }
+    .alert-error { background: var(--danger-light); color: var(--danger); }
+
+    /* ── Summary bar ── */
+    .summary-bar {
+      background: var(--accent-light); border: 1.5px solid var(--accent);
+      border-radius: 10px; padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    }
+    .summary-bar .count {
+      font-family: 'Fraunces', serif; font-size: 26px;
+      font-weight: 700; color: var(--accent-dark); line-height: 1;
+    }
+    .summary-bar .label-sm { font-size: 12px; color: var(--accent); font-weight: 600; }
+
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .empty-state { text-align: center; padding: 28px; color: var(--muted); font-size: 14px; }
+    .empty-state .icon { font-size: 30px; margin-bottom: 8px; }
+
+    /* ── Color picker row ── */
+    .color-picker-row {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 14px;
+    }
+    .color-picker-group { display: flex; align-items: center; gap: 8px; }
+    .color-picker-group label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .color-picker-group input[type=color] {
+      width: 36px; height: 36px; border: none; border-radius: 8px;
+      cursor: pointer; padding: 2px; background: var(--bg); border: 1.5px solid var(--border);
+    }
+    .preset-btn {
+      padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border);
+      font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+      transition: border-color 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Skills apparel ── */
+    .skills-pers-grid {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 7px; margin-bottom: 10px;
+    }
+    .sp-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg); color: var(--text);
+      border: 1.5px solid var(--border); border-radius: 20px;
+      padding: 5px 12px; font-size: 13px; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sp-tag.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .sp-tag:hover { border-color: var(--accent); }
+    
+    .custom-skill-added {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #e8f5e9; color: #2e7d32; border: 1.5px solid #a5d6a7;
+      border-radius: 20px; padding: 4px 10px; font-size: 13px;
+    }
+    .custom-skill-added button {
+      background: none; border: none; cursor: pointer; color: #2e7d32; font-size: 15px; padding: 0; line-height: 1;
+    }
+
+    /* ════════════════════════════════
+       CV PREVIEW & PRINT STYLING (ATS-Friendly)
+    ════════════════════════════════ */
+    @page {
+      size: A4;
+      margin: 0mm;
+    }
+
+    #cv-preview {
+      background: #fff;
+      max-width: 820px; margin: 0 auto;
+      box-shadow: 0 4px 32px rgba(0,40,100,0.13);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; line-height: 1.55;
+      position: relative;
+    }
+
+    .cv-header {
+      background: var(--cv-primary);
+      color: #fff; padding: 32px 36px 28px;
+      display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center;
+    }
+    .cv-photo-wrap img {
+      width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.4);
+    }
+    .cv-no-photo {
+      width: 96px; height: 96px; border-radius: 50%; background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center; font-size: 40px;
+    }
+    .cv-name {
+      font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; line-height: 1.15;
+    }
+    .cv-contact { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+    .cv-contact span { font-size: 12px; opacity: 0.85; }
+
+    .cv-body { display: grid; grid-template-columns: 1fr 2fr; gap: 0; min-height: 235mm; }
+    @media print { .cv-body { min-height: 0 !important; } }
+    .cv-sidebar {
+      background: var(--cv-accent);
+      padding: 28px 22px; border-right: 1px solid #e0e0e0;
+    }
+    .cv-main { padding: 28px 28px 28px 24px; background: #ffffff; }
+
+    .cv-section-title {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--cv-primary);
+      border-bottom: 2px solid var(--cv-primary);
+      padding-bottom: 4px; margin-bottom: 12px; margin-top: 20px;
+    }
+    .cv-section-title:first-child { margin-top: 0; }
+
+    .cv-edu-item { margin-bottom: 14px; }
+    .cv-edu-level { font-weight: 700; font-size: 13px; color: #222; }
+    .cv-edu-state { font-size: 11px; margin-top: 2px; }
+    .cv-edu-state .badge {
+      display: inline-block; padding: 1px 7px; border-radius: 99px;
+      font-size: 10px; font-weight: 700;
+    }
+    .badge-complete { background: #D4EDDA; color: #155724; }
+    .badge-progress { background: #FFF3CD; color: #856404; }
+
+    .cv-course-item { margin-bottom: 10px; }
+    .cv-course-name { font-weight: 600; font-size: 12px; }
+    .cv-course-meta { font-size: 11px; color: #666; margin-top: 1px; }
+
+    .cv-skill-tag {
+      display: inline-block; background: rgba(0,94,184,0.1);
+      color: var(--cv-primary); font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 99px; margin: 2px 3px 2px 0;
+    }
+
+    .cv-exp-item { margin-bottom: 18px; }
+    .cv-exp-title { font-weight: 700; font-size: 14px; color: #111; }
+    .cv-exp-area { font-size: 12px; color: var(--cv-primary); font-weight: 600; margin-top: 1px; }
+    .cv-exp-context { font-size: 11px; color: #777; margin-top: 2px; margin-bottom: 6px; }
+    .cv-exp-bullets { padding-left: 0; list-style: none; }
+    .cv-exp-bullets li {
+      font-size: 12px; line-height: 1.5; padding-left: 14px;
+      position: relative; margin-bottom: 3px; color: #333;
+    }
+    .cv-exp-bullets li::before {
+      content: '▸'; position: absolute; left: 0;
+      color: var(--cv-primary); font-size: 10px; top: 2px;
+    }
+
+    /* ── Print styles ── (CORREGIDO PARA EVITAR PÁGINAS DUPLICADAS) */
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body { background: #fff !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; min-height: 0 !important; height: auto !important; }
+      html { height: auto !important; }
+      header, .tabs-bar, #tool-panel, .no-print, .backup-bar { display: none !important; }
+      #print-area { display: block !important; position: relative; width: 100%; height: auto; overflow: visible; }
+      #print-area #cv-preview { box-shadow: none !important; max-width: 100% !important; width: 100% !important; margin: 0 !important; page-break-inside: avoid; }
+      #print-area .cv-body { display: grid !important; grid-template-columns: 1fr 2fr !important; }
+      #print-area .cv-header { display: grid !important; grid-template-columns: auto 1fr !important; gap: 24px !important; }
+      #print-area .cv-sidebar { border-right: 1px solid #e0e0e0 !important; border-bottom: none !important; }
+      #print-area .cv-name { font-size: 22px !important; }
+    }
+    #print-area { display: none; }
+
+    @media(max-width:600px){
+      header { padding: 16px 14px 12px; }
+      header h1 { font-size: 16px; }
+      .tabs-bar { padding: 0 8px; gap: 0; overflow-x: auto; }
+      .tab-btn { padding: 10px 12px; font-size: 12px; white-space: nowrap; }
+      .main-wrap { padding: 14px 10px 50px; gap: 14px; }
+      .card { padding: 16px 14px; }
+      .btn { padding: 10px 14px; font-size: 13px; }
+      .cv-header { grid-template-columns: 1fr; gap: 12px; padding: 20px 18px; }
+      .cv-body { grid-template-columns: 1fr; }
+      .cv-sidebar { border-right: none; border-bottom: 1px solid #e0e0e0; }
+      .cv-name { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="backup-bar no-print" id="backupPromptBar" style="display:none;">
+  <span data-i18n="backupMsg">⚠️ Detectamos datos de un CV guardado previamente en este navegador. ¿Querés recuperarlos?</span>
+  <div class="btns">
+    <button class="btn btn-sm btn-success" data-i18n="backupYes" onclick="restoreLocalBackup()">Sí, recuperar datos</button>
+    <button class="btn btn-sm btn-danger" data-i18n="backupNo" onclick="discardLocalBackup()">No, empezar de cero</button>
+  </div>
+</div>
+
+<header>
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+    <div class="logo-row" style="margin-bottom:0;">
+      <div class="logo-icon">💡</div>
+      <div>
+        <h1>Centro de Innovación Tecnológica / Xevra</h1>
+        <div class="org-name">Aldeas Infantiles Argentina, Filial Mendoza</div>
+      </div>
+    </div>
+    <button id="langToggleBtn" onclick="toggleLang()" class="btn no-print" style="background:rgba(255,255,255,0.15); color:#fff; border:1.5px solid rgba(255,255,255,0.4); font-size:13px; padding:8px 16px; margin-top:4px; white-space:nowrap;">
+      🌐 <span id="langBtnLabel">Switch to English</span>
+    </button>
+  </div>
+  <p data-i18n="headerSubtitle" style="margin-top:8px;">Completá tus datos, educación, habilidades generales y experiencias laborales para confeccionar un CV profesional listo para exportar.</p>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="datos" data-i18n="tab_datos">① Datos</button>
+  <button class="tab-btn" data-tab="educacion" data-i18n="tab_educacion">② Educación</button>
+  <button class="tab-btn" data-tab="habilidades" data-i18n="tab_habilidades">③ Habilidades</button>
+  <button class="tab-btn" data-tab="experiencias" data-i18n="tab_experiencias">④ Experiencias</button>
+  <button class="tab-btn" data-tab="cv" data-i18n="tab_cv">⑤ Vista CV</button>
+</div>
+
+<div id="tool-panel">
+
+<div class="tab-panel active" id="tab-datos">
+<div class="main-wrap">
+  <div class="card">
+    <div class="card-title"><span class="num">📷</span> <span data-i18n="foto_titulo">Foto de perfil (opcional)</span></div>
+    <div class="row2" style="align-items:start; gap:20px;">
+      <div>
+        <div class="photo-upload-area" id="photoDropArea" onclick="document.getElementById('photoInput').click()">
+          <img id="photoPreview" alt="Foto de perfil" />
+          <div id="photoPlaceholder">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" data-i18n="foto_clic">Hacé clic para subir tu foto<br><small>JPG o PNG</small></div>
+          </div>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none" />
+        <button class="btn btn-danger" id="removePhotoBtn" data-i18n="foto_quitar" style="display:none; margin-top:8px; width:100%;" type="button">✕ Quitar foto</button>
+      </div>
+      <div style="font-size:13px; color:var(--muted); padding-top:12px;">
+        <strong style="color:var(--text);" data-i18n="foto_consejo_titulo">Consejo:</strong> <span data-i18n="foto_consejo">usá una foto clara con fondo simple. La imagen se recortará en círculo automáticamente.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">👤</span> <span data-i18n="datos_titulo">Datos personales</span></div>
+    <div class="row2" style="margin-bottom:12px;">
+      <div>
+        <label class="field-label" for="nombre" data-i18n="label_nombre">Nombre y apellido *</label>
+        <input id="nombre" type="text" data-i18n-ph="ph_nombre" placeholder="Ej: María González" autocomplete="name" />
+      </div>
+      <div>
+        <label class="field-label" for="dni" data-i18n="label_dni">DNI</label>
+        <input id="dni" type="text" data-i18n-ph="ph_dni" placeholder="Ej: 35.123.456" />
+      </div>
+    </div>
+    <div class="row3" style="margin-bottom:12px;">
+      <div>
+        <label class="field-label" for="telefono" data-i18n="label_telefono">Teléfono</label>
+        <input id="telefono" type="text" placeholder="+54 9 261 000-0000" autocomplete="tel" />
+      </div>
+      <div>
+        <label class="field-label" for="email" data-i18n="label_email">Email</label>
+        <input id="email" type="email" data-i18n-ph="ph_email" placeholder="correo@ejemplo.com" autocomplete="email" />
+      </div>
+      <div>
+        <label class="field-label" for="fecha" data-i18n="label_fecha">Fecha o Período del CV</label>
+        <input id="fecha" type="text" data-i18n-ph="ph_fecha" placeholder="Ej: Junio 2026" />
+      </div>
+    </div>
+    <div>
+      <label class="field-label" for="direccion" data-i18n="label_direccion">Localidad / Barrio</label>
+      <input id="direccion" type="text" data-i18n-ph="ph_direccion" placeholder="Ej: Godoy Cruz, Mendoza" autocomplete="street-address" />
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:flex-end;">
+    <button class="btn btn-primary" type="button" data-i18n="btn_next_edu" onclick="goTab('educacion')">Siguiente: Educación →</button>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-educacion">
+<div class="main-wrap">
+  <div class="card">
+    <div class="card-title"><span class="num">🎒</span> <span data-i18n="edu_sec_titulo">Educación secundaria</span></div>
+    <div class="edu-block">
+      <div class="row2" style="margin-bottom:12px;">
+        <div>
+          <label class="field-label" for="secNombre" data-i18n="label_secNombre">Nombre del establecimiento</label>
+          <input id="secNombre" type="text" data-i18n-ph="ph_secNombre" placeholder="Ej: Escuela Técnica N° 4..." />
+        </div>
+        <div>
+          <label class="field-label" for="secEstado" data-i18n="label_estado">Estado</label>
+          <select id="secEstado">
+            <option value="" data-i18n="opt_no_esp">— No especificar —</option>
+            <option value="completa" data-i18n="opt_completa">Completa ✓</option>
+            <option value="incompleta" data-i18n="opt_incompleta">Incompleta / en curso</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label class="field-label" for="secAnio" data-i18n="label_secAnio">Año de egreso / cursado</label>
+          <input id="secAnio" type="text" data-i18n-ph="ph_anio" placeholder="Ej: 2022" />
+        </div>
+        <div>
+          <label class="field-label" for="secModalidad" data-i18n="label_modalidadEdu">Modalidad</label>
+          <input id="secModalidad" type="text" data-i18n-ph="ph_modalidadEdu" placeholder="Ej: Bachiller, Técnica..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">🎓</span> <span data-i18n="edu_sup_titulo">Educación superior / universitaria y posgrados</span></div>
+    <div id="alert-edu-superior" class="alert alert-error"></div>
+    <div class="row2" style="margin-bottom:12px;">
+      <div>
+        <label class="field-label" for="supNombre" data-i18n="label_supNombre">Carrera o Titulación *</label>
+        <input id="supNombre" type="text" data-i18n-ph="ph_supNombre" placeholder="Ej: Tecnicatura en Enfermería, Lic. en Administration..." />
+      </div>
+      <div>
+        <label class="field-label" for="supInstitucion" data-i18n="label_supInstitucion">Institución / Universidad</label>
+        <input id="supInstitucion" type="text" data-i18n-ph="ph_supInstitucion" placeholder="Ej: Universidad Nacional de Cuyo" />
+      </div>
+    </div>
+    <div class="row3" style="margin-bottom:14px;">
+      <div>
+        <label class="field-label" for="supAnio" data-i18n="label_supAnio">Año o período</label>
+        <input id="supAnio" type="text" data-i18n-ph="ph_supAnio" placeholder="Ej: 2023–2025 o 2024 (Egreso)" />
+      </div>
+      <div>
+        <label class="field-label" for="supTipo" data-i18n="label_supTipo">Tipo de estudio</label>
+        <select id="supTipo">
+          <option value="Universitaria" data-i18n="opt_univ">Universitaria</option>
+          <option value="Terciaria" data-i18n="opt_terc">Terciaria</option>
+          <option value="Posgrado" data-i18n="opt_posg">Posgrado</option>
+          <option value="Master / MBA">Master / MBA</option>
+          <option value="Doctorado" data-i18n="opt_doct">Doctorado</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="supEstado" data-i18n="label_estado">Estado</label>
+        <select id="supEstado">
+          <option value="completa" data-i18n="opt_egresado">Completa / Egresado ✓</option>
+          <option value="en_curso" data-i18n="opt_en_curso">En curso</option>
+          <option value="incompleta" data-i18n="opt_incompleta2">Incompleta / abandonada</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-secondary" id="agregarEduSupBtn" data-i18n="btn_add_edu_sup" type="button">＋ Agregar educación superior</button>
+    <div class="divider"></div>
+    <div id="edu-superior-list">
+      <div class="empty-state" id="eduSupEmpty" style="padding:14px;" data-i18n="empty_edu_sup">Todavía no agregaste ningún estudio superior.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">📚</span> <span data-i18n="cursos_titulo">Cursos y capacitaciones</span></div>
+    <div id="alert-curso" class="alert alert-error"></div>
+    <div class="row3" style="margin-bottom:12px;">
+      <div>
+        <label class="field-label" for="cursoNombre" data-i18n="label_cursoNombre">Nombre del curso *</label>
+        <input id="cursoNombre" type="text" data-i18n-ph="ph_cursoNombre" placeholder="Ej: Manipulación de Alimentos" />
+      </div>
+      <div>
+        <label class="field-label" for="cursoInstitucion" data-i18n="label_institucion">Institución</label>
+        <input id="cursoInstitucion" type="text" data-i18n-ph="ph_cursoInstitucion" placeholder="Ej: Municipalidad de Mendoza" />
+      </div>
+      <div>
+        <label class="field-label" for="cursoAnio" data-i18n="label_anio">Año</label>
+        <input id="cursoAnio" type="text" data-i18n-ph="ph_anio" placeholder="Ej: 2024" />
+      </div>
+    </div>
+    <div class="row2" style="margin-bottom:14px;">
+      <div>
+        <label class="field-label" for="cursoDuracion" data-i18n="label_duracion">Duración</label>
+        <input id="cursoDuracion" type="text" data-i18n-ph="ph_duracion" placeholder="Ej: 40 hs, 2 meses" />
+      </div>
+      <div>
+        <label class="field-label" for="cursoEstado" data-i18n="label_estado">Estado</label>
+        <select id="cursoEstado">
+          <option value="completo" data-i18n="opt_completo">Completo ✓</option>
+          <option value="en_curso" data-i18n="opt_en_curso">En curso</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-secondary" id="agregarCursoBtn" data-i18n="btn_add_curso" type="button">＋ Agregar curso</button>
+    <div class="divider"></div>
+    <div id="cursos-list">
+      <div class="empty-state" id="cursosEmpty" style="padding:14px;" data-i18n="empty_cursos">Todavía no agregaste ningún curso.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:space-between;">
+    <button class="btn btn-outline" type="button" data-i18n="btn_back_datos" onclick="goTab('datos')">← Datos personales</button>
+    <button class="btn btn-primary" type="button" data-i18n="btn_next_hab" onclick="goTab('habilidades')">Siguiente: Habilidades →</button>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-habilidades">
+<div class="main-wrap">
+  <div class="card">
+    <div class="card-title"><span class="num">⚡</span> <span data-i18n="hab_titulo">Habilidades Destacadas y Competencias</span></div>
+    <div style="font-size:13px; color:var(--muted); margin-bottom:16px;" data-i18n="hab_desc">
+      Seleccioná las habilidades que te identifican para que se incluyan en el apartado lateral de tu CV. También podés escribir y agregar las tuyas personalizadas.
+    </div>
+    
+    <div class="skills-pers-grid" id="skillsPersGrid"></div>
+
+    <div class="divider"></div>
+    
+    <label class="field-label" data-i18n="hab_custom_label">¿Falta alguna? Agregala manualmente:</label>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+      <input id="customSkillInput" type="text" style="max-width:300px;" data-i18n-ph="ph_custom_skill" placeholder="Ej: Manejo de autoelevadores, Soldadura TIG..." />
+      <button class="btn btn-secondary" type="button" id="addCustomSkillBtn" data-i18n="btn_add_skill">＋ Agregar a la lista</button>
+    </div>
+    <div id="customSkillsList" style="display:flex; flex-wrap:wrap; gap:7px;"></div>
+  </div>
+
+  <div style="display:flex; justify-content:space-between;">
+    <button class="btn btn-outline" type="button" data-i18n="btn_back_edu" onclick="goTab('educacion')">← Educación</button>
+    <button class="btn btn-primary" type="button" data-i18n="btn_next_exp" onclick="goTab('experiencias')">Siguiente: Experiencias →</button>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-experiencias">
+<div class="main-wrap">
+  <div class="card">
+    <div class="card-title"><span class="num">➕</span> <span data-i18n="exp_form_titulo">Cargar Experiencia Laboral</span></div>
+    <div id="alert-form" class="alert alert-error"></div>
+
+    <div class="row2" style="margin-bottom:12px;">
+      <div>
+        <label class="field-label" for="area" data-i18n="label_area">Área Ocupacional *</label>
+        <select id="area">
+          <option value="" data-i18n="opt_elegir_area">— Elegir área —</option>
+          <option value="limpieza" data-i18n="area_limpieza">Limpieza</option>
+          <option value="construccion" data-i18n="area_construccion">Construcción</option>
+          <option value="cuidado" data-i18n="area_cuidado">Cuidado (niños y adultos)</option>
+          <option value="estetica" data-i18n="area_estetica">Estética</option>
+          <option value="gastronomia" data-i18n="area_gastronomia">Gastronomía</option>
+          <option value="oficios" data-i18n="area_oficios">Ayudante de oficios</option>
+          <option value="carpinteria" data-i18n="area_carpinteria">Carpintería</option>
+          <option value="mecanica" data-i18n="area_mecanica">Mecánica</option>
+          <option value="metalurgica" data-i18n="area_metalurgica">Metalurgia</option>
+          <option value="ventas" data-i18n="area_ventas">Ventas / Emprendimientos</option>
+          <option value="otro" data-i18n="area_otro">⊕ Otra área (completar a mano)</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="puesto" data-i18n="label_puesto">Puesto específico *</label>
+        <select id="puesto" disabled>
+          <option value="" data-i18n="opt_elegir_puesto">— Primero elegí el área —</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="otraAreaWrap" style="display:none; background: #f8fafc; border:1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom:16px;">
+      <div class="row2" style="margin-bottom:12px;">
+        <div>
+          <label class="field-label" for="otraAreaNombre" data-i18n="label_otraArea">Nombre del Área Especializada *</label>
+          <input id="otraAreaNombre" type="text" data-i18n-ph="ph_otraArea" placeholder="Ej: Logística, Textil, Reparaciones..." />
+        </div>
+        <div>
+          <label class="field-label" for="otraPuestoNombre" data-i18n="label_otraPuesto">Nombre del Puesto *</label>
+          <input id="otraPuestoNombre" type="text" data-i18n-ph="ph_otraPuesto" placeholder="Ej: Operario de Depósito, Costurero/a..." />
+        </div>
+      </div>
+      <div>
+        <label class="field-label" for="otraDescripcion" data-i18n="label_otraDesc">Detalle de tareas desempeñadas *</label>
+        <textarea id="otraDescripcion" rows="4" data-i18n-ph="ph_otraDesc" placeholder="Escribí las tareas principales, una por línea."></textarea>
+      </div>
+    </div>
+
+    <div class="row2" style="margin-bottom:12px;">
+      <div>
+        <label class="field-label" for="empresa" data-i18n="label_empresa">Lugar de trabajo / Empresa</label>
+        <input id="empresa" type="text" data-i18n-ph="ph_empresa" placeholder="Ej: Particular, Taller Metalúrgico, Comercio..." />
+      </div>
+      <div>
+        <label class="field-label" for="lapso" data-i18n="label_lapso">Período / Duración</label>
+        <input id="lapso" type="text" data-i18n-ph="ph_lapso" placeholder="Ej: 2023 - 2024, 6 meses..." />
+      </div>
+    </div>
+
+    <div class="row2" style="margin-bottom:14px;">
+      <div>
+        <label class="field-label" for="modalidad" data-i18n="label_modalidad">Tipo de contratación / Modalidad</label>
+        <select id="modalidad">
+          <option value="remunerado" data-i18n="opt_remunerado">Trabajo registrado / remunerado</option>
+          <option value="informal" data-i18n="opt_informal">Por cuenta propia / Independiente</option>
+          <option value="practica" data-i18n="opt_practica">Práctica profesional / Apoyo</option>
+          <option value="voluntario" data-i18n="opt_voluntario">Voluntariado</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="otros" data-i18n="label_otros">Información adicional (Opcional)</label>
+        <input id="otros" type="text" data-i18n-ph="ph_otros" placeholder="Ej: Referencias, manejo de caja, etc." />
+      </div>
+    </div>
+
+    <div id="puestoHabilidadesSeccion">
+      <label class="field-label" style="margin-bottom:8px; color: var(--accent-dark);" data-i18n="label_tareas_sugeridas">Tareas predefinidas sugeridas para este puesto:</label>
+      <div id="habilidadesWrap">
+        <div class="empty-state" style="padding:14px; grid-column:1/-1;" data-i18n="empty_tareas">Seleccioná un área y puesto para ver sugerencias de tareas.</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="agregarBtn" data-i18n="btn_guardar_exp" type="button" style="margin-top:16px;">＋ Guardar e incluir esta experiencia</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">📋</span> <span data-i18n="exp_lista_titulo">Experiencias laborales cargadas</span></div>
+    <div class="summary-bar" style="margin-bottom:14px;">
+      <div>
+        <div class="count" id="expCount">0</div>
+        <div class="label-sm" data-i18n="exp_registradas">experiencias registradas</div>
+      </div>
+      <button class="btn btn-danger" id="limpiarTodoBtn" data-i18n="btn_vaciar" type="button" style="display:none;">🗑 Vaciar lista</button>
+    </div>
+    <div id="experiencias-list">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">📋</div>
+        <div data-i18n="empty_exp">Ninguna experiencia agregada aún.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:space-between;">
+    <button class="btn btn-outline" type="button" data-i18n="btn_back_hab" onclick="goTab('habilidades')">← Habilidades</button>
+    <button class="btn btn-primary" type="button" data-i18n="btn_ver_cv" onclick="goTab('cv')">Ver Currículum Final →</button>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-cv">
+<div class="main-wrap">
+  <div class="card no-print" style="border: 1.5px solid #b3e5fc; background: #e1f5fe;">
+    <div class="card-title" style="color: #0288d1;"><span class="num" style="background:#0288d1;">💾</span> <span data-i18n="backup_titulo">Copias de seguridad y Respaldos</span></div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <button class="btn btn-primary" style="background:#0288d1;" data-i18n="btn_download_backup" onclick="downloadBackupFile()">📥 Descargar archivo de respaldo</button>
+      <button class="btn btn-secondary" data-i18n="btn_upload_backup" onclick="document.getElementById('importFileInput').click()">📤 Cargar respaldo desde archivo</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="uploadBackupFile(event)" />
+    </div>
+    <p class="field-hint" style="color: #01579b; margin-top:6px;" data-i18n="backup_hint">El sistema guarda tus cambios automáticamente en el navegador. Si cambiás de computadora o querés resguardar tu progreso en un archivo externo para seguir editando después, utilizá estas opciones.</p>
+  </div>
+
+  <div class="card no-print">
+    <div class="card-title"><span class="num">🎨</span> <span data-i18n="diseno_titulo">Diseño y Exportación</span></div>
+    <div class="color-picker-row">
+      <div class="color-picker-group">
+        <label data-i18n="label_color_primary">Color Principal</label>
+        <input type="color" id="colorPrimary" value="#005EB8" />
+      </div>
+      <div class="color-picker-group">
+        <label data-i18n="label_color_sidebar">Fondo Barra Lateral</label>
+        <input type="color" id="colorAccentBg" value="#E8F2FB" />
+      </div>
+      <span style="font-size:12px; color:var(--muted); font-weight:600; margin-left:10px;" data-i18n="estilos_rapidos">Estilos rápidos:</span>
+      <button class="preset-btn" onclick="applyPreset('#005EB8','#E8F2FB')" data-i18n="preset_institucional">🔵 Institucional</button>
+      <button class="preset-btn" onclick="applyPreset('#1B4332','#D8EFDF')" data-i18n="preset_forestal">🟢 Forestal</button>
+      <button class="preset-btn" onclick="applyPreset('#1A237E','#E8EAF6')" data-i18n="preset_ejecutivo">🔷 Ejecutivo</button>
+    </div>
+    <div class="color-picker-row" style="margin-top: 10px;">
+      <div class="color-picker-group">
+        <label for="cvIdioma" style="font-weight: 700; color: var(--accent-dark);" data-i18n="label_idioma_cv">Idioma del CV final:</label>
+        <select id="cvIdioma" style="max-width: 160px;" onchange="buildCV()">
+          <option value="es" data-i18n="opt_espanol">Español 🇪🇸</option>
+          <option value="en" data-i18n="opt_ingles">Inglés 🇬🇧</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+      <button class="btn btn-primary" data-i18n="btn_sync" onclick="buildCV()" type="button">🔄 Sincronizar y Actualizar</button>
+      <button class="btn btn-print" data-i18n="btn_print" onclick="printCV()" type="button">🖨 Imprimir / Guardar en PDF</button>
+    </div>
+    <p class="field-hint" style="margin-top:8px; color: var(--accent);" data-i18n="print_hint">
+      💡 <strong>Nota sobre el PDF:</strong> En la ventana de impresión, recordá desmarcar la casilla de <em>"Encabezados y pies de página"</em> y activar <em>"Gráficos de fondo"</em> para un acabado limpio.
+    </p>
+  </div>
+
+  <div id="alert-cv" class="alert alert-error no-print"></div>
+
+  <div id="cv-preview">
+    <div style="text-align:center; padding:40px; color:#aaa; font-size:14px;" id="cv-placeholder" data-i18n="cv_placeholder">
+      Hacé clic en <strong>"Sincronizar y Actualizar"</strong> para renderizar los datos ingresados.
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:flex-start; margin-top:14px;" class="no-print">
+    <button class="btn btn-outline" type="button" data-i18n="btn_back_exp" onclick="goTab('experiencias')">← Ajustar Experiencias</button>
+  </div>
+</div>
+</div>
+
+</div>
+
+<div id="print-area"></div>
+
+<script>
+const DATA = {
+  limpieza:{label:"Limpieza",puestos:{personal_limpieza:{label:"Personal de limpieza",habilidades:{orden_rutinas:{label:"Organización y cumplimiento de rutinas",bullets:["Planificación y ejecución de tareas sistemáticas de ordenamiento y desinfección programada."]},limpieza_integral:{label:"Limpieza integral avanzada",bullets:["Higienización experta de instalaciones comunes, cocinas industriales, sanitarios y vidrieras."]},cuidado_superficies:{label:"Uso seguro de productos químicos",bullets:["Dosificación eficiente de reactivos de desinfección protegiendo revestimientos delicados y mobiliario."]}}},asistente_domestico:{label:"Asistente doméstico/a",habilidades:{planificacion_tareas:{label:"Priorización y autonomía",bullets:["Gestión autónoma del mantenimiento del hogar optimizando tiempos críticos de higienización."]},limpieza_detallada:{label:"Limpieza fina y prolijidad",bullets:["Cuidado minucioso de vajilla, ropa de blanco y detalles estéticos en estancias residenciales."]}}}}},
+  construccion:{label:"Construcción",puestos:{ayudante_obra:{label:"Ayudante de obra",habilidades:{apoyo_indicaciones:{label:"Asistencia y soporte en albañilería",bullets:["Preparación técnica de mezclas, hormigones, revoques y asistencia directa a oficiales."]},orden_area_obra:{label:"Acondicionamiento y seguridad",bullets:["Mantenimiento preventivo de áreas críticas eliminando obstáculos peligrosos de la zona de trabajo."]}}},apoyo_reformas:{label:"Auxiliar de reformas",habilidades:{limpieza_obra:{label:"Acopio y retiro selectivo",bullets:["Clasificación de escombros, maderas y metales optimizando los espacios de circulación."]}}}}},
+  cuidado:{label:"Cuidado (niños y adultos)",puestos:{cuidador_domicilio:{label:"Cuidador/a de adultos",habilidades:{acompanamiento:{label:"Asistencia gerontológica y empatía",bullets:["Acompañamiento integral, control de esquemas farmacológicos simples y contención psicológica de adultos."]},rutinas_vida_diaria:{label:"Estimulación cognitiva y motriz",bullets:["Ayuda en transferencias, higienización en cama y fomento de movilidad segura."]}}},cuidado_ninios:{label:"Cuidado de niños",habilidades:{juegos_actividades:{label:"Recreación didáctica dirigida",bullets:["Coordinación de actividades lúdico-educativas en entornos seguros garantizando la tranquilidad del menor."]},apoyo_higiene_alimentacion:{label:"Preparación nutricional y cuidado",bullets:["Elaboración de minutas saludables y supervisión rigsuosa de hábitos de higiene cotidianos."]}}}}},
+  estetica:{label:"Estética",puestos:{asistente_estetica:{label:"Asistente / apoyo en estética",habilidades:{preparacion_area:{label:"Esterilización y bioseguridad",bullets:["Sanitización minuciosa de instrumental de belleza y organización técnica de camillas y productos."]}}},servicios_estetica:{label:"Manicura / Pedicura / Estilista",habilidades:{terminaciones_detail:{label:"Técnicas avanzadas de acabado",bullets:["Aplicación precisa de esmaltados, tratamientos capilares o faciales con altos estándares visuales."]}}}}},
+  gastronomia:{label:"Gastronomía",puestos:{ayudante_cocina:{label:"Ayudante de cocina",habilidades:{apoyo_preparacion:{label:"Mise en place y pre-elaboración",bullets:["Corte técnico de vegetales, deshuesado, porcionado y estandarización de materias primas."]},higiene_cocina:{label:"Seguridad bromatológica y limpieza",bullets:["Lavado y sanitizado de bachas, baterías de cocina y estufas siguiendo normas de inocuidad."]}}},apoyo_sala:{label:"Bachero / Auxiliar de salón",habilidades:{orden_area_servicio:{label:"Fajinado y montaje rápido",bullets:["Higienización acelerada de cristalería, cubertería y soporte en la organización de mesas."]}}}}},
+  oficios:{label:"Ayudante de oficios",puestos:{ayudante_oficio:{label:"Ayudante técnico de taller",habilidades:{preparacion_herramientas:{label:"Control logístico de herramientas",bullets:["Clasificación, lubricación y alistamiento rápido de máquinas herramientas para tareas industriales."]}}}}},
+  carpinteria:{label:"Carpintería",puestos:{ayudante_carpinteria:{label:"Ayudante de carpintería",habilidades:{preparacion_materials:{label:"Maquetado, corte y lijado inicial",bullets:["Uso correcto de lijadoras orbitales, escuadras y asistencia en el ensamble estructural de piezas mobiliarias."]}}}}},
+  mecanica:{label:"Mecánica",puestos:{ayudante_mecanica:{label:"Auxiliar mecánico automotriz",habilidades:{apoyo_montaje_desmontaje:{label:"Mantenimiento preventivo inicial",bullets:["Desmontaje de neumáticos, cambios de filtros de aceite y aire, y lavado técnico de motores y transmisiones."]}}}}},
+  metalurgica:{label:"Metalurgia",puestos:{ayudante_metal:{label:"Ayudante metalúrgico / soldadura",habilidades:{corte_desbaste_apoyo:{label:"Uso de amoladoras y tronzadoras",bullets:["Tareas de desbaste de cordones de soldadura, cortes lineales de perfiles y preparación de superficies."]}}}}},
+  ventas:{label:"Ventas / Emprendimientos",puestos:{vendedor_ambulante:{label:"Asesor/a comercial en terreno",habilidades:{atencion_cliente:{label:"Prospección y captación de clientes",bullets:["Abordaje dinámico en vía pública y ferias logrando el interés inmediato en carteras de productos."]}}},emprendedor_ventas:{label:"Gestor/a de ventas / E-commerce",habilidades:{autogestion:{label:"Administración y logística comercial",bullets:["Control de inventarios en línea, despacho de paquetería y gestión de atención al cliente vía WhatsApp/redes."]}}}}}
+};
+
+const SKILLS_PREDEFINIDAS = [
+  'Trabajo en equipo', 'Responsabilidad profesional', 'Puntualidad y compromiso', 'Orientación al cliente',
+  'Resolución de problemas', 'Adaptabilidad al cambio', 'Prolijidad en manufactura', 'Comunicación asertiva',
+  'Liderazgo operativo', 'Capacidad de aprendizaje rápido', 'Organización del tiempo', 'Manejo de herramientas de mano',
+  'Seguridad e higiene industrial', 'Atención al detalle', 'Iniciativa y proactividad', 'Honestidad e integridad laboral'
+];
+
+const SKILLS_TRANSLATIONS = {
+  'Trabajo en equipo': 'Teamwork',
+  'Responsabilidad profesional': 'Professional responsibility',
+  'Puntualidad y compromiso': 'Punctuality and commitment',
+  'Orientación al cliente': 'Customer orientation',
+  'Resolución de problemas': 'Problem solving',
+  'Adaptabilidad al cambio': 'Adaptability to change',
+  'Prolijidad en manufactura': 'Manufacturing neatness',
+  'Comunicación asertiva': 'Assertive communication',
+  'Liderazgo operativo': 'Operational leadership',
+  'Capacidad de aprendizaje rápido': 'Fast learning ability',
+  'Organización del tiempo': 'Time management',
+  'Manejo de herramientas de mano': 'Hand tool handling',
+  'Seguridad e higiene industrial': 'Industrial safety and hygiene',
+  'Atención al detalle': 'Attention to detail',
+  'Iniciativa y proactividad': 'Initiative and proactivity',
+  'Honestidad e integridad laboral': 'Work honesty and integrity'
+};
+
+const TRADUCCIONES = {
+  es: {
+    educacion: "Educación", capacitaciones: "Capacitaciones", habilidades: "Habilidades", trayectoria: "Trayectoria Laboral",
+    secundaria: "Secundaria", completo: "Completo", en_curso: "En curso", egresado: "Egresado", incompleto: "Incompleta / abandonada",
+    no_skills: "Ninguna seleccionada.", no_cursos: "Sin cursos cargados.", no_edu: "No especificada.", no_exp: "Sin experiencias laborales registradas."
+  },
+  en: {
+    educacion: "Education", capacitaciones: "Certifications & Courses", habilidades: "Skills", trayectoria: "Work History",
+    secundaria: "High School", completo: "Completed", en_curso: "In Progress", egresado: "Graduated", incompleto: "Incomplete",
+    no_skills: "None selected.", no_cursos: "No courses loaded.", no_edu: "Not specified.", no_exp: "No work experience registered."
+  }
+};
+
+let experiencias = [];
+let cursos = [];
+let eduSuperior = [];
+let skillsSeleccionadas = new Set();
+let customSkills = [];
+let selectedHabilidadesPuesto = new Set();
+let photoDataURL = null;
+
+function goTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabId));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => goTab(btn.dataset.tab));
+});
+
+function getAppState() {
+  return {
+    inputs: {
+      nombre: document.getElementById('nombre').value,
+      dni: document.getElementById('dni').value,
+      telefono: document.getElementById('telefono').value,
+      email: document.getElementById('email').value,
+      fecha: document.getElementById('fecha').value,
+      direccion: document.getElementById('direccion').value,
+      secNombre: document.getElementById('secNombre').value,
+      secEstado: document.getElementById('secEstado').value,
+      secAnio: document.getElementById('secAnio').value,
+      secModalidad: document.getElementById('secModalidad').value,
+      colorPrimary: document.getElementById('colorPrimary').value,
+      colorAccentBg: document.getElementById('colorAccentBg').value,
+    },
+    experiencias,
+    cursos,
+    eduSuperior,
+    skillsSeleccionadas: Array.from(skillsSeleccionadas),
+    customSkills,
+    photoDataURL
+  };
+}
+
+function setAppState(state) {
+  if (!state) return;
+  if (state.inputs) {
+    Object.entries(state.inputs).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val || '';
+    });
+  }
+  experiencias = state.experiencias || [];
+  cursos = state.cursos || [];
+  eduSuperior = state.eduSuperior || [];
+  skillsSeleccionadas = new Set(state.skillsSeleccionadas || []);
+  customSkills = state.customSkills || [];
+  photoDataURL = state.photoDataURL || null;
+
+  const photoPreview = document.getElementById('photoPreview');
+  const photoPlaceholder = document.getElementById('photoPlaceholder');
+  const photoDropArea = document.getElementById('photoDropArea');
+  const removePhotoBtn = document.getElementById('removePhotoBtn');
+
+  if (photoDataURL) {
+    photoPreview.src = photoDataURL;
+    photoPreview.style.display = 'block';
+    photoPlaceholder.style.display = 'none';
+    photoDropArea.classList.add('has-photo');
+    removePhotoBtn.style.display = 'block';
+  } else {
+    photoPreview.src = '';
+    photoPreview.style.display = 'none';
+    photoPlaceholder.style.display = 'block';
+    photoDropArea.classList.remove('has-photo');
+    removePhotoBtn.style.display = 'none';
+  }
+
+  renderCursos();
+  renderEduSuperior();
+  renderSkillsBase();
+  renderCustomSkillsList();
+  renderExperienciasList();
+  buildCV();
+}
+
+function autoSave() {
+  localStorage.setItem('cv_generator_backup', JSON.stringify(getAppState()));
+}
+
+window.downloadBackupFile = function() {
+  const stateStr = JSON.stringify(getAppState(), null, 2);
+  const blob = new Blob([stateStr], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const nombreUser = document.getElementById('nombre').value.trim() || 'usuario';
+  const fileName = `respaldo_cv_${nombreUser.replace(/\s+/g, '_')}.json`;
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
+window.uploadBackupFile = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      setAppState(parsed);
+      autoSave();
+      alert('¡Respaldo importado y cargado con éxito!');
+    } catch (err) {
+      alert('Error: El archivo seleccionado no tiene un formato válido.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+};
+
+window.restoreLocalBackup = function() {
+  const saved = localStorage.getItem('cv_generator_backup');
+  if (saved) setAppState(JSON.parse(saved));
+  document.getElementById('backupPromptBar').style.display = 'none';
+};
+
+window.discardLocalBackup = function() {
+  if(confirm('¿Seguro que querés empezar de cero? Esto borrará el autoguardado del navegador.')) {
+    localStorage.removeItem('cv_generator_backup');
+    document.getElementById('backupPromptBar').style.display = 'none';
+    location.reload();
+  }
+};
+
+function initAutoSaveListeners() {
+  const inputs = document.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.id !== 'importFileInput' && input.id !== 'photoInput') {
+      input.addEventListener('input', autoSave);
+      input.addEventListener('change', autoSave);
+    }
+  });
+}
+
+// Carga de foto
+const photoInput = document.getElementById('photoInput');
+const photoPreview = document.getElementById('photoPreview');
+const photoPlaceholder = document.getElementById('photoPlaceholder');
+const removePhotoBtn = document.getElementById('removePhotoBtn');
+const photoDropArea = document.getElementById('photoDropArea');
+
+if(photoInput) {
+  photoInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      photoDataURL = ev.target.result;
+      photoPreview.src = photoDataURL;
+      photoPreview.style.display = 'block';
+      photoPlaceholder.style.display = 'none';
+      photoDropArea.classList.add('has-photo');
+      removePhotoBtn.style.display = 'block';
+      autoSave();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+if(removePhotoBtn) {
+  removePhotoBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    photoDataURL = null;
+    photoPreview.src = '';
+    photoPreview.style.display = 'none';
+    photoPlaceholder.style.display = 'block';
+    photoDropArea.classList.remove('has-photo');
+    removePhotoBtn.style.display = 'none';
+    photoInput.value = '';
+    autoSave();
+  });
+}
+
+// Apartado de Educación Superior Dinámica
+const alertEduSup = document.getElementById('alert-edu-superior');
+const btnAgregarEduSup = document.getElementById('agregarEduSupBtn');
+if(btnAgregarEduSup) {
+  btnAgregarEduSup.addEventListener('click', () => {
+    const nombre = document.getElementById('supNombre').value.trim();
+    if (!nombre) { showAlert(alertEduSup, 'Por favor, completá el nombre de la carrera o titulación.'); return; }
+    
+    eduSuperior.push({
+      id: Date.now(),
+      nombre,
+      institucion: document.getElementById('supInstitucion').value.trim(),
+      anio: document.getElementById('supAnio').value.trim(),
+      tipo: document.getElementById('supTipo').value,
+      estado: document.getElementById('supEstado').value
+    });
+    
+    document.getElementById('supNombre').value = '';
+    document.getElementById('supInstitucion').value = '';
+    document.getElementById('supAnio').value = '';
+    renderEduSuperior();
+    autoSave();
+  });
+}
+
+function renderEduSuperior() {
+  const container = document.getElementById('edu-superior-list');
+  if(!container) return;
+  container.innerHTML = '';
+  if (eduSuperior.length === 0) {
+    container.innerHTML = '<div class="empty-state" id="eduSupEmpty" style="padding:14px;">Todavía no agregaste ningún estudio superior.</div>';
+    return;
+  }
+  eduSuperior.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'edu-item-list';
+    let estadoLabel = e.estado === 'completa' ? 'Completo' : (e.estado === 'en_curso' ? 'En curso' : 'Incompleto');
+    div.innerHTML = `
+      <div class="edu-info">
+        <div class="edu-name">${e.tipo}: ${e.nombre}</div>
+        <div class="edu-meta">${e.institucion ? e.institucion + ' · ' : ''}${e.anio ? e.anio : ''} (${estadoLabel})</div>
+      </div>
+      <button class="btn btn-danger" type="button" style="padding:6px 10px;" onclick="eliminarEduSuperior(${e.id})">✕</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+window.eliminarEduSuperior = function(id) {
+  eduSuperior = eduSuperior.filter(x => x.id !== id);
+  renderEduSuperior();
+  autoSave();
+}
+
+// Cursos y Formación
+const alertCurso = document.getElementById('alert-curso');
+const btnAgregarCurso = document.getElementById('agregarCursoBtn');
+if(btnAgregarCurso) {
+  btnAgregarCurso.addEventListener('click', () => {
+    const nombre = document.getElementById('cursoNombre').value.trim();
+    if (!nombre) { showAlert(alertCurso, 'Por favor, completá el nombre obligatorio del curso.'); return; }
+    
+    cursos.push({
+      id: Date.now(),
+      nombre,
+      institucion: document.getElementById('cursoInstitucion').value.trim(),
+      anio: document.getElementById('cursoAnio').value.trim(),
+      duracion: document.getElementById('cursoDuracion').value.trim(),
+      estado: document.getElementById('cursoEstado').value
+    });
+    
+    document.getElementById('cursoNombre').value = '';
+    document.getElementById('cursoInstitucion').value = '';
+    document.getElementById('cursoAnio').value = '';
+    document.getElementById('cursoDuracion').value = '';
+    renderCursos();
+    autoSave();
+  });
+}
+
+function renderCursos() {
+  const container = document.getElementById('cursos-list');
+  if(!container) return;
+  container.innerHTML = '';
+  if (cursos.length === 0) {
+    container.innerHTML = '<div class="empty-state" id="cursosEmpty" style="padding:14px;">Todavía no agregaste ningún curso.</div>';
+    return;
+  }
+  cursos.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'course-item';
+    div.innerHTML = `
+      <div class="course-info">
+        <div class="course-name">${c.nombre}</div>
+        <div class="course-meta">${c.institucion ? c.institucion + ' · ' : ''}${c.anio ? c.anio : ''}${c.duracion ? ' · ' + c.duracion : ''} (${c.estado === 'completo' ? 'Completado' : 'En curso'})</div>
+      </div>
+      <button class="btn btn-danger" type="button" style="padding:6px 10px;" onclick="eliminarCurso(${c.id})">✕</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+window.eliminarCurso = function(id) {
+  cursos = cursos.filter(x => x.id !== id);
+  renderCursos();
+  autoSave();
+}
+
+function showAlert(el, msg) {
+  if(!el) return;
+  el.textContent = msg; el.className = 'alert alert-error show';
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// Apartado de Habilidades
+function renderSkillsBase() {
+  const grid = document.getElementById('skillsPersGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
+  SKILLS_PREDEFINIDAS.forEach(sk => {
+    const label = isEn ? (SKILLS_TRANSLATIONS[sk] || sk) : sk;
+    const tag = document.createElement('div');
+    tag.className = 'sp-tag' + (skillsSeleccionadas.has(sk) ? ' selected' : '');
+    tag.textContent = (skillsSeleccionadas.has(sk) ? '✓ ' : '') + label;
+    tag.addEventListener('click', () => {
+      if (skillsSeleccionadas.has(sk)) skillsSeleccionadas.delete(sk);
+      else skillsSeleccionadas.add(sk);
+      renderSkillsBase();
+      autoSave();
+    });
+    grid.appendChild(tag);
+  });
+}
+
+const btnAddCustomSkill = document.getElementById('addCustomSkillBtn');
+if(btnAddCustomSkill) {
+  btnAddCustomSkill.addEventListener('click', () => {
+    const input = document.getElementById('customSkillInput');
+    const val = input.value.trim();
+    if (!val) return;
+    if (!customSkills.includes(val)) {
+      customSkills.push(val);
+      renderCustomSkillsList();
+      autoSave();
+    }
+    input.value = '';
+  });
+}
+
+function renderCustomSkillsList() {
+  const container = document.getElementById('customSkillsList');
+  if(!container) return;
+  container.innerHTML = '';
+  customSkills.forEach((s, idx) => {
+    const span = document.createElement('span');
+    span.className = 'custom-skill-added';
+    span.innerHTML = `${s} <button type="button" onclick="removeCustomSkill(${idx})">✕</button>`;
+    container.appendChild(span);
+  });
+}
+
+window.removeCustomSkill = function(idx) {
+  customSkills.splice(idx, 1);
+  renderCustomSkillsList();
+  autoSave();
+}
+
+// Experiencias Laborales
+const areaEl = document.getElementById('area');
+const puestoEl = document.getElementById('puesto');
+const habWrap = document.getElementById('habilidadesWrap');
+
+if(areaEl) {
+  areaEl.addEventListener('change', () => {
+    const ak = areaEl.value;
+    puestoEl.innerHTML = '<option value="">— Elegir puesto —</option>';
+    habWrap.innerHTML = '<div class="empty-state" style="padding:14px; grid-column:1/-1;">Seleccioná un área y puesto para ver sugerencias de tareas.</div>';
+    
+    if (ak === 'otro') {
+      puestoEl.disabled = true;
+      document.getElementById('otraAreaWrap').style.display = 'block';
+      document.getElementById('puestoHabilidadesSeccion').style.display = 'none';
+      return;
+    }
+    
+    document.getElementById('otraAreaWrap').style.display = 'none';
+    document.getElementById('puestoHabilidadesSeccion').style.display = 'block';
+    
+    if (!ak) { puestoEl.disabled = true; return; }
+    puestoEl.disabled = false;
+    
+    Object.entries(DATA[ak].puestos).forEach(([pk, po]) => {
+      const opt = document.createElement('option'); opt.value = pk; opt.textContent = po.label;
+      puestoEl.appendChild(opt);
+    });
+  });
+}
+
+if(puestoEl) {
+  puestoEl.addEventListener('change', () => {
+    const ak = areaEl.value, pk = puestoEl.value;
+    if (ak && pk) renderHabilidadesSugeridas(ak, pk);
+  });
+}
+
+function renderHabilidadesSugeridas(areaKey, puestoKey) {
+  selectedHabilidadesPuesto = new Set();
+  habWrap.innerHTML = '';
+  const habilidades = DATA[areaKey].puestos[puestoKey].habilidades;
+  Object.entries(habilidades).forEach(([hk, h]) => {
+    const card = document.createElement('div');
+    card.className = 'hab-card';
+    card.innerHTML = `
+      <input type="checkbox" id="hab_${hk}" value="${hk}">
+      <label for="hab_${hk}"><strong>${h.label}:</strong> ${h.bullets[0]}</label>
+    `;
+    const cb = card.querySelector('input');
+    cb.addEventListener('change', () => {
+      if (cb.checked) { selectedHabilidadesPuesto.add(hk); card.classList.add('selected'); }
+      else { selectedHabilidadesPuesto.delete(hk); card.classList.remove('selected'); }
+    });
+    card.close = card.querySelector('input'); // logic preservation
+    card.addEventListener('click', (e) => { if (e.target !== cb) cb.click(); });
+    habWrap.appendChild(card);
+  });
+}
+
+const btnAgregarExp = document.getElementById('agregarBtn');
+if(btnAgregarExp) {
+  btnAgregarExp.addEventListener('click', () => {
+    const ak = areaEl.value;
+    const alertForm = document.getElementById('alert-form');
+    let areaLabel = '', puestoLabel = '', tareas = [];
+
+    if (!ak) { showAlert(alertForm, 'Seleccioná un área ocupacional válida.'); return; }
+
+    if (ak === 'otro') {
+      areaLabel = document.getElementById('otraAreaNombre').value.trim();
+      puestoLabel = document.getElementById('otraPuestoNombre').value.trim();
+      const desc = document.getElementById('otraDescripcion').value.trim();
+      if (!areaLabel || !puestoLabel || !desc) { showAlert(alertForm, 'Completá todos los campos manuales obligatorios.'); return; }
+      tareas = desc.split('\n').map(t => t.trim()).filter(Boolean);
+    } else {
+      const pk = puestoEl.value;
+      if (!pk) { showAlert(alertForm, 'Elegí el puesto específico trabajado.'); return; }
+      areaLabel = DATA[ak].label;
+      puestoLabel = DATA[ak].puestos[pk].label;
+      selectedHabilidadesPuesto.forEach(hk => {
+        tareas.push(DATA[ak].puestos[pk].habilidades[hk].bullets[0]);
+      });
+      if (tareas.length === 0) { showAlert(alertForm, 'Elegí al menos una de las tareas sugeridas para este puesto.'); return; }
+    }
+
+    const empresa = document.getElementById('empresa').value.trim();
+    const lapso = document.getElementById('lapso').value.trim();
+    const modSelect = document.getElementById('modalidad');
+    const modalidadStr = modSelect.options[modSelect.selectedIndex].text;
+    const adicional = document.getElementById('otros').value.trim();
+
+    let contextStr = [empresa, lapso, modalidadStr, adicional].filter(Boolean).join(' | ');
+
+    experiencias.push({
+      id: Date.now(),
+      area: areaLabel,
+      puesto: puestoLabel,
+      context: contextStr,
+      bullets: tareas
+    });
+
+    document.getElementById('empresa').value = '';
+    document.getElementById('lapso').value = '';
+    document.getElementById('otros').value = '';
+    if (ak === 'otro') {
+      document.getElementById('otraAreaNombre').value = '';
+      document.getElementById('otraPuestoNombre').value = '';
+      document.getElementById('otraDescripcion').value = '';
+    }
+    areaEl.value = ''; puestoEl.innerHTML = '<option value="">— Primero elegí el área —</option>'; puestoEl.disabled = true;
+    habWrap.innerHTML = '<div class="empty-state" style="padding:14px; grid-column:1/-1;">Seleccioná un área y puesto para ver sugerencias de tareas.</div>';
+    
+    renderExperienciasList();
+    autoSave();
+  });
+}
+
+function renderExperienciasList() {
+  const list = document.getElementById('experiencias-list');
+  const count = document.getElementById('expCount');
+  const clearBtn = document.getElementById('limpiarTodoBtn');
+  if(!list) return;
+  list.innerHTML = '';
+  count.textContent = experiencias.length;
+
+  const t = (typeof I18N !== 'undefined' && typeof currentLang !== 'undefined') ? I18N[currentLang] : null;
+  const emptyTxt = t ? t.empty_exp : 'Ninguna experiencia agregada aún.';
+  const btnLabel = t ? t.btn_quitar : '✕ Quitar';
+
+  if (experiencias.length === 0) {
+    list.innerHTML = `<div class="empty-state" id="emptyState"><div class="icon">📋</div><div>${emptyTxt}</div></div>`;
+    clearBtn.style.display = 'none'; return;
+  }
+  clearBtn.style.display = 'block';
+
+  experiencias.forEach(exp => {
+    const item = document.createElement('div');
+    item.className = 'exp-item';
+    item.innerHTML = `
+      <div class="exp-item-header">
+        <div>
+          <div class="exp-item-title">${exp.puesto} (${exp.area})</div>
+          <div class="exp-item-meta">${exp.context}</div>
+        </div>
+        <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="eliminarExperiencia(${exp.id})">${btnLabel}</button>
+      </div>
+      <div class="exp-item-text">${exp.bullets.map(b => '• ' + b).join('\n')}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+window.eliminarExperiencia = function(id) {
+  experiencias = experiencias.filter(e => e.id !== id);
+  renderExperienciasList();
+  autoSave();
+}
+
+const btnLimpiarTodo = document.getElementById('limpiarTodoBtn');
+if(btnLimpiarTodo) {
+  btnLimpiarTodo.addEventListener('click', () => {
+    if (confirm('¿Seguro querés vaciar toda la lista de experiencias laborales?')) { experiencias = []; renderExperienciasList(); autoSave(); }
+  });
+}
+
+// Compilación Visual del CV
+window.applyPreset = function(primary, accentBg) {
+  document.getElementById('colorPrimary').value = primary;
+  document.getElementById('colorAccentBg').value = accentBg;
+  buildCV();
+  autoSave();
+}
+
+function darkenHex(hex) {
+  let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return '#' + [Math.max(0,r-30), Math.max(0,g-30), Math.max(0,b-30)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+window.buildCV = function() {
+  const name = document.getElementById('nombre').value.trim();
+
+  if (!name) { 
+    if(document.getElementById('cv-preview')) {
+       document.getElementById('cv-preview').innerHTML = `<div style="text-align:center; padding:40px; color:#aaa; font-size:14px;" id="cv-placeholder">Por favor, escribí al menos tu <strong>Nombre y Apellido</strong> en la sección ① Datos para renderizar la vista previa del CV.</div>`;
+    }
+    return; 
+  }
+
+  const cp = document.getElementById('colorPrimary').value;
+  const cb = document.getElementById('colorAccentBg').value;
+  const cs = darkenHex(cp);
+  const lang = document.getElementById('cvIdioma').value || 'es';
+  const t = TRADUCCIONES[lang];
+
+  const dni = document.getElementById('dni').value.trim();
+  const tel = document.getElementById('telefono').value.trim();
+  const em = document.getElementById('email').value.trim();
+  const dir = document.getElementById('direccion').value.trim();
+  const fe = document.getElementById('fecha').value.trim();
+
+  let contactArr = [];
+  if (tel) contactArr.push(`<span>📱 ${tel}</span>`);
+  if (em) contactArr.push(`<span>✉️ ${em}</span>`);
+  if (dir) contactArr.push(`<span>📍 ${dir}</span>`);
+  if (dni) contactArr.push(`<span>🆔 DNI: ${dni}</span>`);
+  if (fe) contactArr.push(`<span>📅 ${fe}</span>`);
+
+  let imgHtml = photoDataURL 
+    ? `<img src="${photoDataURL}" alt="Perfil">` 
+    : `<div class="cv-no-photo">👤</div>`;
+
+  // --- SECCIÓN EDUCACIÓN (Filtra campos vacíos) ---
+  let eduHtml = '';
+  const secE = document.getElementById('secEstado').value;
+  const secN = document.getElementById('secNombre').value.trim();
+  
+  if (secE || secN) {
+    let estadoSec = secE === 'completa' ? t.completo : t.en_curso;
+    eduHtml += `<div class="cv-edu-item">
+      <div class="cv-edu-level">${t.secundaria}: ${document.getElementById('secModalidad').value || 'Bachiller'}</div>
+      ${secN ? `<div style="font-size:12px;color:#444;">${secN}</div>` : ''}
+      <div class="cv-edu-state">${secE ? `<span class="badge ${secE=='completa'?'badge-complete':'badge-progress'}">${estadoSec}</span>` : ''} ${document.getElementById('secAnio').value}</div>
+    </div>`;
+  }
+
+  // Educación superior dinámica
+  if (eduSuperior.length > 0) {
+    eduSuperior.forEach(e => {
+      let estadoSup = e.estado === 'completa' ? t.egresado : (e.estado === 'en_curso' ? t.en_curso : t.incompleto);
+      eduHtml += `<div class="cv-edu-item">
+        <div class="cv-edu-level">${e.tipo}: ${e.nombre}</div>
+        ${e.institucion ? `<div style="font-size:12px;color:#444;">${e.institucion}</div>` : ''}
+        <div class="cv-edu-state"><span class="badge ${e.estado=='completa'?'badge-complete':'badge-progress'}">${estadoSup}</span> ${e.anio || ''}</div>
+      </div>`;
+    });
+  }
+  
+  // --- SECCIÓN CURSOS ---
+  let curHtml = '';
+  if (cursos.length > 0) {
+    curHtml = cursos.map(c => `
+      <div class="cv-course-item">
+        <div class="cv-course-name">${c.nombre}</div>
+        <div class="cv-course-meta">${c.institucion || ''} ${c.anio ? `(${c.anio})` : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // --- SECCIÓN HABILIDADES ---
+  const skillsBase = Array.from(skillsSeleccionadas).map(s => lang === 'en' ? (SKILLS_TRANSLATIONS[s] || s) : s);
+  const totalSkills = [...skillsBase, ...customSkills];
+  let skillHtml = '';
+  if (totalSkills.length > 0) {
+    skillHtml = totalSkills.map(s => `<span class="cv-skill-tag" style="background:${cb};color:${cs};">${s}</span>`).join('');
+  }
+
+  // --- SECCIÓN EXPERIENCIAS ---
+  let expHtml = '';
+  if (experiencias.length > 0) {
+    expHtml = experiencias.map(e => `
+      <div class="cv-exp-item">
+        <div class="cv-exp-title">${e.puesto}</div>
+        <div class="cv-exp-area" style="color:${cp};">${e.area}</div>
+        <div class="cv-exp-context">${e.context}</div>
+        <ul class="cv-exp-bullets">
+          ${e.bullets.map(b => `<li style="--cv-primary:${cp}">${b}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  } else { expHtml = `<p style="color:#777; font-size:13px;">${t.no_exp}</p>`; }
+
+  // Armado condicional de barras laterales (No renderiza si están vacías)
+  let sidebarContentHtml = '';
+  
+  if (eduHtml) {
+    sidebarContentHtml += `<div class="cv-section-title" style="color:${cp};border-bottom-color:${cp};">${t.educacion}</div>${eduHtml}`;
+  }
+  if (curHtml) {
+    sidebarContentHtml += `<div class="cv-section-title" style="color:${cp};border-bottom-color:${cp};">${t.capacitaciones}</div>${curHtml}`;
+  }
+  if (skillHtml) {
+    sidebarContentHtml += `<div class="cv-section-title" style="color:${cp};border-bottom-color:${cp};">${t.habilidades}</div><div style="margin-top:6px;">${skillHtml}</div>`;
+  }
+
+  const output = `
+    <div class="cv-header" style="background:${cp};">
+      <div class="cv-photo-wrap">${imgHtml}</div>
+      <div>
+        <div class="cv-name">${name}</div>
+        <div class="cv-contact">${contactArr.join('')}</div>
+      </div>
+    </div>
+    <div class="cv-body">
+      <div class="cv-sidebar" style="background:${cb};">
+        ${sidebarContentHtml || `<p style="color:#777;font-size:12px;">${t.no_edu}</p>`}
+      </div>
+      <div class="cv-main">
+        <div class="cv-section-title" style="color:${cp};border-bottom-color:${cp};">${t.trayectoria}</div>
+        ${expHtml}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('cv-preview').innerHTML = output;
+}
+
+window.printCV = function() {
+  buildCV();
+  const preview = document.getElementById('cv-preview');
+  if (!preview || preview.querySelector('#cv-placeholder')) {
+    alert('Por favor, ingresá al menos tu nombre y apellido antes de exportar a PDF.');
+    return;
+  }
+
+  const cp = document.getElementById('colorPrimary').value;
+  const cb = document.getElementById('colorAccentBg').value;
+  const cs = darkenHex(cp);
+
+  const printArea = document.getElementById('print-area');
+  printArea.innerHTML = `
+    <style>
+      #print-area #cv-preview { --cv-primary:${cp}; --cv-secondary:${cs}; --cv-accent:${cb}; }
+      #print-area .cv-section-title { color:${cp} !important; border-bottom-color:${cp} !important; }
+      #print-area .cv-exp-bullets li::before { color:${cp} !important; }
+      #print-area .cv-skill-tag { background:${cb} !important; color:${cs} !important; }
+      #print-area .cv-header { background:${cp} !important; }
+    </style>
+    <div id="cv-preview">${preview.innerHTML}</div>
+  `;
+  window.print();
+}
+
+// ════════════════════════════════
+// SISTEMA DE TRADUCCIÓN COMPLETO
+// ════════════════════════════════
+const I18N = {
+  es: {
+    headerSubtitle: 'Completá tus datos, educación, habilidades generales y experiencias laborales para confeccionar un CV profesional listo para exportar.',
+    langBtn: 'Switch to English',
+    tab_datos: '① Datos',
+    tab_educacion: '② Educación',
+    tab_habilidades: '③ Habilidades',
+    tab_experiencias: '④ Experiencias',
+    tab_cv: '⑤ Vista CV',
+    backupMsg: '⚠️ Detectamos datos de un CV guardado previamente en este navegador. ¿Querés recuperarlos?',
+    backupYes: 'Sí, recuperar datos',
+    backupNo: 'No, empezar de cero',
+    foto_titulo: 'Foto de perfil (opcional)',
+    foto_clic: 'Hacé clic para subir tu foto<br><small>JPG o PNG</small>',
+    foto_quitar: '✕ Quitar foto',
+    foto_consejo_titulo: 'Consejo:',
+    foto_consejo: 'usá una foto clara con fondo simple. La imagen se recortará en círculo automáticamente.',
+    datos_titulo: 'Datos personales',
+    label_nombre: 'Nombre y apellido *',
+    ph_nombre: 'Ej: María González',
+    label_dni: 'DNI',
+    ph_dni: 'Ej: 35.123.456',
+    label_telefono: 'Teléfono',
+    label_email: 'Email',
+    ph_email: 'correo@ejemplo.com',
+    label_fecha: 'Fecha o Período del CV',
+    ph_fecha: 'Ej: Junio 2026',
+    label_direccion: 'Localidad / Barrio',
+    ph_direccion: 'Ej: Godoy Cruz, Mendoza',
+    btn_next_edu: 'Siguiente: Educación →',
+    edu_sec_titulo: 'Educación secundaria',
+    label_secNombre: 'Nombre del establecimiento',
+    ph_secNombre: 'Ej: Escuela Técnica N° 4...',
+    label_estado: 'Estado',
+    opt_no_esp: '— No especificar —',
+    opt_completa: 'Completa ✓',
+    opt_incompleta: 'Incompleta / en curso',
+    label_secAnio: 'Año de egreso / cursado',
+    ph_anio: 'Ej: 2022',
+    label_modalidadEdu: 'Modalidad',
+    ph_modalidadEdu: 'Ej: Bachiller, Técnica...',
+    edu_sup_titulo: 'Educación superior / universitaria y posgrados',
+    label_supNombre: 'Carrera o Titulación *',
+    ph_supNombre: 'Ej: Tecnicatura en Enfermería, Lic. en Administración...',
+    label_supInstitucion: 'Institución / Universidad',
+    ph_supInstitucion: 'Ej: Universidad Nacional de Cuyo',
+    label_supAnio: 'Año o período',
+    ph_supAnio: 'Ej: 2023–2025 o 2024 (Egreso)',
+    label_supTipo: 'Tipo de estudio',
+    opt_univ: 'Universitaria',
+    opt_terc: 'Terciaria',
+    opt_posg: 'Posgrado',
+    opt_doct: 'Doctorado',
+    opt_egresado: 'Completa / Egresado ✓',
+    opt_en_curso: 'En curso',
+    opt_incompleta2: 'Incompleta / abandonada',
+    btn_add_edu_sup: '＋ Agregar educación superior',
+    empty_edu_sup: 'Todavía no agregaste ningún estudio superior.',
+    cursos_titulo: 'Cursos y capacitaciones',
+    label_cursoNombre: 'Nombre del curso *',
+    ph_cursoNombre: 'Ej: Manipulación de Alimentos',
+    label_institucion: 'Institución',
+    ph_cursoInstitucion: 'Ej: Municipalidad de Mendoza',
+    label_anio: 'Año',
+    label_duracion: 'Duración',
+    ph_duracion: 'Ej: 40 hs, 2 meses',
+    opt_completo: 'Completo ✓',
+    btn_add_curso: '＋ Agregar curso',
+    empty_cursos: 'Todavía no agregaste ningún curso.',
+    btn_back_datos: '← Datos personales',
+    btn_next_hab: 'Siguiente: Habilidades →',
+    hab_titulo: 'Habilidades Destacadas y Competencias',
+    hab_desc: 'Seleccioná las habilidades que te identifican para que se incluyan en el apartado lateral de tu CV. También podés escribir y agregar las tuyas personalizadas.',
+    hab_custom_label: '¿Falta alguna? Agregala manualmente:',
+    ph_custom_skill: 'Ej: Manejo de autoelevadores, Soldadura TIG...',
+    btn_add_skill: '＋ Agregar a la lista',
+    btn_back_edu: '← Educación',
+    btn_next_exp: 'Siguiente: Experiencias →',
+    exp_form_titulo: 'Cargar Experiencia Laboral',
+    label_area: 'Área Ocupacional *',
+    opt_elegir_area: '— Elegir área —',
+    area_limpieza: 'Limpieza',
+    area_construccion: 'Construcción',
+    area_cuidado: 'Cuidado (niños y adultos)',
+    area_estetica: 'Estética',
+    area_gastronomia: 'Gastronomía',
+    area_oficios: 'Ayudante de oficios',
+    area_carpinteria: 'Carpintería',
+    area_mecanica: 'Mecánica',
+    area_metalurgica: 'Metalurgia',
+    area_ventas: 'Ventas / Emprendimientos',
+    area_otro: '⊕ Otra área (completar a mano)',
+    label_puesto: 'Puesto específico *',
+    opt_elegir_puesto: '— Primero elegí el área —',
+    label_otraArea: 'Nombre del Área Especializada *',
+    ph_otraArea: 'Ej: Logística, Textil, Reparaciones...',
+    label_otraPuesto: 'Nombre del Puesto *',
+    ph_otraPuesto: 'Ej: Operario de Depósito, Costurero/a...',
+    label_otraDesc: 'Detalle de tareas desempeñadas *',
+    ph_otraDesc: 'Escribí las tareas principales, una por línea.',
+    label_empresa: 'Lugar de trabajo / Empresa',
+    ph_empresa: 'Ej: Particular, Taller Metalúrgico, Comercio...',
+    label_lapso: 'Período / Duración',
+    ph_lapso: 'Ej: 2023 - 2024, 6 meses...',
+    label_modalidad: 'Tipo de contratación / Modalidad',
+    opt_remunerado: 'Trabajo registrado / remunerado',
+    opt_informal: 'Por cuenta propia / Independiente',
+    opt_practica: 'Práctica profesional / Apoyo',
+    opt_voluntario: 'Voluntariado',
+    label_otros: 'Información adicional (Opcional)',
+    ph_otros: 'Ej: Referencias, manejo de caja, etc.',
+    label_tareas_sugeridas: 'Tareas predefinidas sugeridas para este puesto:',
+    empty_tareas: 'Seleccioná un área y puesto para ver sugerencias de tareas.',
+    btn_guardar_exp: '＋ Guardar e incluir esta experiencia',
+    exp_lista_titulo: 'Experiencias laborales cargadas',
+    exp_registradas: 'experiencias registradas',
+    btn_vaciar: '🗑 Vaciar lista',
+    empty_exp: 'Ninguna experiencia agregada aún.',
+    btn_back_hab: '← Habilidades',
+    btn_ver_cv: 'Ver Currículum Final →',
+    backup_titulo: 'Copias de seguridad y Respaldos',
+    btn_download_backup: '📥 Descargar archivo de respaldo',
+    btn_upload_backup: '📤 Cargar respaldo desde archivo',
+    backup_hint: 'El sistema guarda tus cambios automáticamente en el navegador. Si cambiás de computadora o querés resguardar tu progreso en un archivo externo para seguir editando después, utilizá estas opciones.',
+    diseno_titulo: 'Diseño y Exportación',
+    label_color_primary: 'Color Principal',
+    label_color_sidebar: 'Fondo Barra Lateral',
+    estilos_rapidos: 'Estilos rápidos:',
+    preset_institucional: '🔵 Institucional',
+    preset_forestal: '🟢 Forestal',
+    preset_ejecutivo: '🔷 Ejecutivo',
+    label_idioma_cv: 'Idioma del CV final:',
+    opt_espanol: 'Español 🇪🇸',
+    opt_ingles: 'Inglés 🇬🇧',
+    btn_sync: '🔄 Sincronizar y Actualizar',
+    btn_print: '🖨 Imprimir / Guardar en PDF',
+    print_hint: '💡 <strong>Nota sobre el PDF:</strong> En la ventana de impresión, recordá desmarcar la casilla de <em>"Encabezados y pies de página"</em> y activar <em>"Gráficos de fondo"</em> para un acabado limpio.',
+    cv_placeholder: 'Hacé clic en <strong>"Sincronizar y Actualizar"</strong> para renderizar los datos ingresados.',
+    btn_back_exp: '← Ajustar Experiencias',
+    btn_quitar: '✕ Quitar',
+  },
+  en: {
+    headerSubtitle: 'Fill in your personal data, education, skills, and work experience to create a professional CV ready to export.',
+    langBtn: 'Cambiar a Español',
+    tab_datos: '① Personal Info',
+    tab_educacion: '② Education',
+    tab_habilidades: '③ Skills',
+    tab_experiencias: '④ Experience',
+    tab_cv: '⑤ CV Preview',
+    backupMsg: '⚠️ We found a previously saved CV in this browser. Would you like to restore it?',
+    backupYes: 'Yes, restore data',
+    backupNo: 'No, start fresh',
+    foto_titulo: 'Profile photo (optional)',
+    foto_clic: 'Click to upload your photo<br><small>JPG or PNG</small>',
+    foto_quitar: '✕ Remove photo',
+    foto_consejo_titulo: 'Tip:',
+    foto_consejo: 'Use a clear photo with a simple background. The image will be cropped to a circle automatically.',
+    datos_titulo: 'Personal information',
+    label_nombre: 'Full name *',
+    ph_nombre: 'E.g.: María González',
+    label_dni: 'ID / DNI',
+    ph_dni: 'E.g.: 35.123.456',
+    label_telefono: 'Phone',
+    label_email: 'Email',
+    ph_email: 'email@example.com',
+    label_fecha: 'CV Date or Period',
+    ph_fecha: 'E.g.: June 2026',
+    label_direccion: 'City / Neighborhood',
+    ph_direccion: 'E.g.: Godoy Cruz, Mendoza',
+    btn_next_edu: 'Next: Education →',
+    edu_sec_titulo: 'Secondary / High School education',
+    label_secNombre: 'School name',
+    ph_secNombre: 'E.g.: Technical School No. 4...',
+    label_estado: 'Status',
+    opt_no_esp: '— Do not specify —',
+    opt_completa: 'Completed ✓',
+    opt_incompleta: 'Incomplete / In progress',
+    label_secAnio: 'Graduation year / year attended',
+    ph_anio: 'E.g.: 2022',
+    label_modalidadEdu: 'Track / Modality',
+    ph_modalidadEdu: 'E.g.: Science, Technical...',
+    edu_sup_titulo: 'University / Higher education & postgraduate',
+    label_supNombre: 'Degree or qualification *',
+    ph_supNombre: 'E.g.: Nursing Technician, Business Administration...',
+    label_supInstitucion: 'Institution / University',
+    ph_supInstitucion: 'E.g.: National University of Cuyo',
+    label_supAnio: 'Year or period',
+    ph_supAnio: 'E.g.: 2023–2025 or 2024 (Graduated)',
+    label_supTipo: 'Type of study',
+    opt_univ: 'University',
+    opt_terc: 'Tertiary / College',
+    opt_posg: 'Postgraduate',
+    opt_doct: 'Doctorate',
+    opt_egresado: 'Completed / Graduated ✓',
+    opt_en_curso: 'In progress',
+    opt_incompleta2: 'Incomplete / Dropped',
+    btn_add_edu_sup: '＋ Add higher education',
+    empty_edu_sup: 'No higher education added yet.',
+    cursos_titulo: 'Courses & certifications',
+    label_cursoNombre: 'Course name *',
+    ph_cursoNombre: 'E.g.: Food Handling',
+    label_institucion: 'Institution',
+    ph_cursoInstitucion: 'E.g.: City of Mendoza',
+    label_anio: 'Year',
+    label_duracion: 'Duration',
+    ph_duracion: 'E.g.: 40 hrs, 2 months',
+    opt_completo: 'Completed ✓',
+    btn_add_curso: '＋ Add course',
+    empty_cursos: 'No courses added yet.',
+    btn_back_datos: '← Personal info',
+    btn_next_hab: 'Next: Skills →',
+    hab_titulo: 'Key Skills & Competencies',
+    hab_desc: 'Select the skills that best represent you to include them in your CV sidebar. You can also type and add your own custom skills.',
+    hab_custom_label: 'Missing one? Add it manually:',
+    ph_custom_skill: 'E.g.: Forklift operation, TIG welding...',
+    btn_add_skill: '＋ Add to list',
+    btn_back_edu: '← Education',
+    btn_next_exp: 'Next: Experience →',
+    exp_form_titulo: 'Add Work Experience',
+    label_area: 'Occupational Area *',
+    opt_elegir_area: '— Choose area —',
+    area_limpieza: 'Cleaning',
+    area_construccion: 'Construction',
+    area_cuidado: 'Caregiving (children & adults)',
+    area_estetica: 'Beauty & Aesthetics',
+    area_gastronomia: 'Gastronomy / Food Service',
+    area_oficios: 'Trades helper',
+    area_carpinteria: 'Carpentry',
+    area_mecanica: 'Mechanics',
+    area_metalurgica: 'Metallurgy',
+    area_ventas: 'Sales / Entrepreneurship',
+    area_otro: '⊕ Other area (fill in manually)',
+    label_puesto: 'Specific position *',
+    opt_elegir_puesto: '— First choose an area —',
+    label_otraArea: 'Specialized Area Name *',
+    ph_otraArea: 'E.g.: Logistics, Textiles, Repairs...',
+    label_otraPuesto: 'Job Title *',
+    ph_otraPuesto: 'E.g.: Warehouse Operator, Seamstress...',
+    label_otraDesc: 'Description of tasks performed *',
+    ph_otraDesc: 'Write the main tasks, one per line.',
+    label_empresa: 'Workplace / Company',
+    ph_empresa: 'E.g.: Private household, Metalwork Shop...',
+    label_lapso: 'Period / Duration',
+    ph_lapso: 'E.g.: 2023 - 2024, 6 months...',
+    label_modalidad: 'Contract type / Modality',
+    opt_remunerado: 'Registered / Paid employment',
+    opt_informal: 'Self-employed / Freelance',
+    opt_practica: 'Internship / Support role',
+    opt_voluntario: 'Volunteer work',
+    label_otros: 'Additional information (Optional)',
+    ph_otros: 'E.g.: References, cash handling, etc.',
+    label_tareas_sugeridas: 'Suggested predefined tasks for this position:',
+    empty_tareas: 'Select an area and position to see task suggestions.',
+    btn_guardar_exp: '＋ Save and include this experience',
+    exp_lista_titulo: 'Work experience entries',
+    exp_registradas: 'experiences registered',
+    btn_vaciar: '🗑 Clear list',
+    empty_exp: 'No experience added yet.',
+    btn_back_hab: '← Skills',
+    btn_ver_cv: 'View Final CV →',
+    backup_titulo: 'Backups & Data Export',
+    btn_download_backup: '📥 Download backup file',
+    btn_upload_backup: '📤 Load backup from file',
+    backup_hint: 'The system auto-saves your changes in the browser. If you switch computers or want to save your progress externally, use these options.',
+    diseno_titulo: 'Design & Export',
+    label_color_primary: 'Primary Color',
+    label_color_sidebar: 'Sidebar Background',
+    estilos_rapidos: 'Quick styles:',
+    preset_institucional: '🔵 Institutional',
+    preset_forestal: '🟢 Forest',
+    preset_ejecutivo: '🔷 Executive',
+    label_idioma_cv: 'CV language:',
+    opt_espanol: 'Spanish 🇦🇷',
+    opt_ingles: 'English 🇬🇧',
+    btn_sync: '🔄 Sync & Refresh',
+    btn_print: '🖨 Print / Save as PDF',
+    print_hint: '💡 <strong>PDF tip:</strong> In the print dialog, uncheck <em>"Headers and footers"</em> and enable <em>"Background graphics"</em> for a clean result.',
+    cv_placeholder: 'Click <strong>"Sync & Refresh"</strong> to render your CV preview.',
+    btn_back_exp: '← Adjust Experience',
+    btn_quitar: '✕ Remove',
+  }
+};
+
+let currentLang = 'es';
+
+window.toggleLang = function() {
+  currentLang = currentLang === 'es' ? 'en' : 'es';
+  applyLang(currentLang);
+};
+
+function applyLang(lang) {
+  const t = I18N[lang];
+  const langBtn = document.getElementById('langBtnLabel');
+  if (langBtn) langBtn.innerHTML = t.langBtn;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.getAttribute('data-i18n-ph');
+    if (t[key] !== undefined) el.placeholder = t[key];
+  });
+
+  renderExperienciasList();
+  renderSkillsBase();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSkillsBase();
+  initAutoSaveListeners();
+
+  const savedBackup = localStorage.getItem('cv_generator_backup');
+  if (savedBackup) {
+    document.getElementById('backupPromptBar').style.display = 'flex';
+  }
+});
+</script>
+</body>
+</html>
