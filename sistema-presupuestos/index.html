@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Presupuestos Pro - Xevra.ar</title>
+    <!-- Librería para convertir HTML a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0284c7;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 1150px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* Header y Botón de Idioma Estilizado */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .btn-lang { 
+            background: #1e293b; 
+            color: #94a3b8; 
+            border: 1px solid #38bdf8; 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            font-weight: bold; 
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .btn-lang:hover { 
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            border-color: #0284c7;
+        }
+        .btn-lang .active-lang {
+            color: #38bdf8;
+            font-weight: 800;
+            text-decoration: underline;
+        }
+
+        /* Panel del Formulario */
+        .panel { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
+        .panel-section { border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 15px; }
+        .panel-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        h2 { margin-top: 0; color: #38bdf8; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .form-group { margin-bottom: 10px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 0.85rem; }
+        select { cursor: pointer; border-color: #38bdf8; }
+        textarea { resize: vertical; min-height: 55px; }
+        input[type="color"] { height: 38px; padding: 2px; cursor: pointer; }
+
+        /* Controles especiales */
+        .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc; font-size: 0.85rem; margin-bottom: 6px; }
+        .checkbox-label input { width: auto; cursor: pointer; }
+        .btn-secondary { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-top: 6px; }
+
+        /* Tabla de ítems dinámicos */
+        .item-row { display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 6px; margin-bottom: 8px; align-items: center; }
+        .btn-add { background: #0284c7; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 6px; font-size: 0.85rem; }
+        .btn-remove { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+        
+        /* Botones de acción principales */
+        .actions-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn-download { background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: bold; }
+        .btn-wsp { background: #25d366; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+        
+        /* Vista previa del PDF (Hoja Blanca) */
+        .preview-container { background: #525659; padding: 20px; border-radius: 12px; display: flex; justify-content: center; overflow-x: auto; }
+        #hoja-presupuesto { background: #ffffff; color: #1e293b; width: 100%; max-width: 520px; padding: 30px; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-size: 0.82rem; transition: all 0.2s ease; line-height: 1.4; }
+        
+        /* Layout PDF */
+        .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary-color); padding-bottom: 12px; margin-bottom: 15px; gap: 15px; }
+        .pdf-brand-box { display: flex; align-items: center; gap: 12px; }
+        #pv-logo { max-height: 55px; max-width: 120px; object-fit: contain; display: none; }
+        .pdf-header h1 { margin: 0; color: var(--primary-color); font-size: 1.3rem; line-height: 1.1; }
+        .pdf-header-sub { color: #64748b; font-size: 0.75rem; }
+        
+        .pdf-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .pdf-meta-box p { margin: 2px 0; font-size: 0.8rem; }
+        
+        .pdf-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .pdf-table th { background: #f1f5f9; text-align: left; padding: 8px; color: var(--primary-color); border-bottom: 2px solid #cbd5e1; font-size: 0.8rem; }
+        .pdf-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
+        
+        .pdf-totals-box { margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+        .pdf-row-total { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 0.85rem; color: #64748b; }
+        .pdf-row-final { display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: bold; color: var(--primary-color); margin-top: 6px; }
+        
+        .pdf-info-blocks { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
+        .pdf-condiciones { background: #f8fafc; padding: 10px; border-left: 3px solid var(--primary-color); font-size: 0.75rem; color: #475569; display: none; }
+        .pdf-pago { background: #f0fdf4; padding: 10px; border-left: 3px solid #16a34a; font-size: 0.75rem; color: #166534; display: none; }
+        
+        /* Bloque de Firmas */
+        .pdf-signatures-box { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 35px; padding-top: 10px; }
+        .signature-col { text-align: center; border-top: 1px dashed #94a3b8; padding-top: 6px; }
+        .signature-col span { font-size: 0.75rem; color: #475569; font-weight: bold; display: block; }
+        
+        .pdf-footer { margin-top: 20px; padding-top: 8px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 0.72rem; color: #94a3b8; }
+        
+        @media (max-width: 850px) { .container { grid-template-columns: 1fr; } .actions-box { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- PANEL DE CONTROL -->
+    <div class="panel">
+        
+        <div class="top-bar">
+            <h2 style="margin:0;" id="txt-main-title">Sistema de Presupuestos</h2>
+            <button class="btn-lang" onclick="toggleIdioma()" id="btn-lang">
+                <span id="lang-es">🇪🇸 ES</span> | <span id="lang-en">EN 🇺🇸</span>
+            </button>
+        </div>
+
+        <!-- SECCIÓN 1: RUBRO & PERSONALIZACIÓN -->
+        <div class="panel-section">
+            <h2 id="lbl-sec-custom">🎨 Personalización & Rubro</h2>
+            <div class="form-group">
+                <label id="lbl-select-rubro">Seleccioná tu Rubro / Plantilla</label>
+                <select id="select-rubro" onchange="cambiarRubro(true)">
+                    <!-- Se llena dinámicamente -->
+                </select>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label id="lbl-brand-color">Color Principal de Marca</label>
+                    <input type="color" id="primary-color" value="#0284c7" oninput="cambiarColorMarca(this.value)">
+                </div>
+                <div class="form-group">
+                    <label id="lbl-currency">Moneda</label>
+                    <select id="select-moneda" onchange="actualizarVistas()">
+                        <option value="$">$ (ARS)</option>
+                        <option value="USD $">USD ($)</option>
+                        <option value="€">€ (EUR)</option>
+                        <option value="R$">R$ (BRL)</option>
+                        <option value="CLP $">CLP ($)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label id="lbl-logo">Logo (Opcional - Se guarda automáticamente)</label>
+                <input type="file" id="logo-input" accept="image/*" onchange="cargarLogo(event)">
+                <button id="btn-quitar-logo" class="btn-secondary" style="display: none;" onclick="quitarLogo()">Quitar Logo</button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: DATOS DEL EMISOR -->
+        <div class="panel-section">
+            <h2 id="lbl-sec-emisor">🏢 Tus Datos (Emisor)</h2>
+            <div class="form-group">
+                <label id="lbl-emisor-name">Nombre / Emprendimiento</label>
+                <input type="text" id="emisor" value="" oninput="actualizarVistas(); guardarPreferencias();">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label id="lbl-emisor-cuit">CUIT / DNI / ID (Opcional)</label>
+                    <input type="text" id="cuit-emisor" placeholder="20-xxxxxxxx-x" oninput="actualizarVistas(); guardarPreferencias();">
+                </div>
+                <div class="form-group">
+                    <label id="lbl-emisor-tel">Teléfono / WhatsApp</label>
+                    <input type="text" id="tel-emisor" placeholder="+54 9..." oninput="actualizarVistas(); guardarPreferencias();">
+                </div>
+            </div>
+            <div class="form-group">
+                <label id="lbl-emisor-pago">Datos para Cobro / Señas (Alias, CBU, Bank, Paypal)</label>
+                <input type="text" id="pago-emisor" placeholder="Ej: ALIAS: mi.negocio.mp | CBU: 000000..." oninput="actualizarVistas(); guardarPreferencias();">
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: DATOS DEL CLIENTE Y FECHA -->
+        <div class="panel-section">
+            <h2 id="lbl-sec-cliente">👤 Datos del Cliente & Validez</h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label id="lbl-cliente-name">Nombre del Cliente</label>
+                    <input type="text" id="cliente" value="Juan Pérez" oninput="actualizarVistas()">
+                </div>
+                <div class="form-group">
+                    <label id="lbl-cliente-cuit">CUIT / DNI / ID Cliente (Opcional)</label>
+                    <input type="text" id="cuit-cliente" placeholder="30-xxxxxxxx-x" oninput="actualizarVistas()">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="checkbox-label" id="lbl-check-fecha">
+                        <input type="checkbox" id="check-fecha" checked onchange="actualizarVistas()"> Incluir Fecha
+                    </label>
+                    <input type="date" id="input-fecha" oninput="actualizarVistas()">
+                </div>
+                <div class="form-group">
+                    <label id="lbl-validez">Validez de la Cotización</label>
+                    <input type="text" id="validez-input" value="15 días corridos" oninput="actualizarVistas()">
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: ÍTEMS, CONDICIONES Y FIRMAS -->
+        <div class="panel-section">
+            <h2 id="lbl-sec-items">📦 Ítems a Cotizar</h2>
+            <div id="lista-items">
+                <!-- Filas dinámicas -->
+            </div>
+            <button class="btn-add" id="btn-add-item" onclick="agregarItem()">+ Agregar Ítem</button>
+
+            <div class="form-group" style="margin-top: 12px;">
+                <label id="lbl-discount">Descuento (%)</label>
+                <input type="number" id="descuento-pct" value="0" min="0" max="100" placeholder="Ej: 10" oninput="actualizarVistas()">
+            </div>
+
+            <div class="form-group">
+                <label id="lbl-conditions">Condiciones / Tiempos / Garantías</label>
+                <textarea id="condiciones-input" oninput="actualizarVistas()"></textarea>
+            </div>
+
+            <!-- Opción para incluir Firmas -->
+            <div class="form-group" style="margin-top: 10px;">
+                <label class="checkbox-label" id="lbl-check-firmas">
+                    <input type="checkbox" id="check-firmas" onchange="actualizarVistas()"> Incluir Bloque de Firmas
+                </label>
+            </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="actions-box">
+            <button class="btn-download" id="btn-dl-pdf" onclick="descargarPDF()">📥 Descargar PDF</button>
+            <a id="btn-wsp-link" href="#" target="_blank" class="btn-wsp">💬 Enviar WhatsApp</a>
+        </div>
+    </div>
+
+    <!-- VISTA PREVIA DEL PDF -->
+    <div class="preview-container">
+        <div id="hoja-presupuesto">
+            <div class="pdf-header">
+                <div class="pdf-brand-box">
+                    <img id="pv-logo" src="" alt="Logo">
+                    <div>
+                        <h1 id="pv-emisor">Mi Negocio</h1>
+                        <span class="pdf-header-sub" id="pv-subtitulo">Presupuesto de Servicios</span>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <strong style="color: var(--primary-color);" id="pv-title-doc">PRESUPUESTO</strong>
+                    <div id="pv-fecha-box">
+                        <small id="pv-fecha"></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Grid (Cliente y Emisor) -->
+            <div class="pdf-meta-grid">
+                <div class="pdf-meta-box">
+                    <strong style="color: var(--primary-color); display:block; margin-bottom:2px;" id="pv-lbl-emisor-meta">EMISOR:</strong>
+                    <p><strong id="pv-emisor-meta">Mi Negocio</strong></p>
+                    <p id="pv-cuit-emisor-box" style="display:none;"><span id="pv-lbl-cuit-emisor">CUIT/DNI:</span> <span id="pv-cuit-emisor"></span></p>
+                    <p id="pv-tel-emisor-box" style="display:none;">Tel: <span id="pv-tel-emisor"></span></p>
+                </div>
+                <div class="pdf-meta-box">
+                    <strong style="color: var(--primary-color); display:block; margin-bottom:2px;" id="pv-lbl-cliente-meta">CLIENTE:</strong>
+                    <p><strong id="pv-cliente">Juan Pérez</strong></p>
+                    <p id="pv-cuit-cliente-box" style="display:none;"><span id="pv-lbl-cuit-cliente">CUIT/DNI:</span> <span id="pv-cuit-cliente"></span></p>
+                    <p><span id="pv-lbl-validez-meta">Validez:</span> <span id="pv-validez">15 días</span></p>
+                </div>
+            </div>
+
+            <!-- Tabla de ítems -->
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th id="th-desc">Descripción</th>
+                        <th style="text-align: center;" id="th-cant">Cant.</th>
+                        <th style="text-align: right;" id="th-price">Precio</th>
+                        <th style="text-align: right;" id="th-total">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="pv-tabla-body">
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+
+            <!-- Totales -->
+            <div class="pdf-totals-box">
+                <div class="pdf-row-total">
+                    <span id="pv-lbl-subtotal">Subtotal:</span>
+                    <span><span class="symbol-moneda">$</span><span id="pv-subtotal">0</span></span>
+                </div>
+                <div class="pdf-row-total" id="row-desc-container" style="color: #ef4444; display: none;">
+                    <span><span id="pv-lbl-discount">Descuento</span> (<span id="pv-desc-pct">0</span>%):</span>
+                    <span>-<span class="symbol-moneda">$</span><span id="pv-desc-monto">0</span></span>
+                </div>
+                <div class="pdf-row-final">
+                    <span id="pv-lbl-total-final">Total Final:</span>
+                    <span><span class="symbol-moneda">$</span><span id="pv-total">0</span></span>
+                </div>
+            </div>
+
+            <!-- Bloques Informativos -->
+            <div class="pdf-info-blocks">
+                <div class="pdf-condiciones" id="pv-condiciones-box">
+                    <strong id="pv-lbl-condiciones">Condiciones del servicio:</strong> <span id="pv-condiciones-texto"></span>
+                </div>
+                <div class="pdf-pago" id="pv-pago-box">
+                    <strong id="pv-lbl-pago">Datos para transferencia / seña:</strong> <span id="pv-pago-texto"></span>
+                </div>
+            </div>
+
+            <!-- Bloque Opcional de Firmas -->
+            <div class="pdf-signatures-box" id="pv-firmas-box" style="display: none;">
+                <div class="signature-col">
+                    <span id="pv-lbl-firma-emisor">Firma Emisor / Prestador</span>
+                </div>
+                <div class="signature-col">
+                    <span id="pv-lbl-firma-cliente">Firma Cliente (Conformidad)</span>
+                </div>
+            </div>
+
+            <div class="pdf-footer" id="pv-footer-text">
+                Presupuesto generado gratis con <strong>xevra.ar</strong> — Soluciones Web
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    const rubroOptionsTranslation = {
+        es: [
+            { val: "web", text: "💻 Desarrollo Web / Servicios Digitales" },
+            { val: "marketing", text: "📢 Community Manager & Marketing" },
+            { val: "electricidad", text: "⚡ Electricidad & Climatización" },
+            { val: "plomeria", text: "🔧 Plomería & Gasista" },
+            { val: "pintura", text: "🎨 Pintura & Durlock / Remodelaciones" },
+            { val: "carpinteria", text: "🪵 Carpintería & Herrería a Medida" },
+            { val: "jardineria", text: "🌿 Jardinería & Piletas" },
+            { val: "pasteleria", text: "🎂 Pastelería & Gastronomía" },
+            { val: "fotografia", text: "📸 Fotografía & Video" },
+            { val: "dj", text: "🎧 DJ, Sonido e Iluminación" },
+            { val: "fletes", text: "🚚 Fletes & Mudanzas" },
+            { val: "mecanica", text: "🚗 Mecánica & Detailing Automotor" },
+            { val: "general", text: "📋 General / Personalizado" }
+        ],
+        en: [
+            { val: "web", text: "💻 Web Development / Digital Services" },
+            { val: "marketing", text: "📢 Community Management & Marketing" },
+            { val: "electricidad", text: "⚡ Electrical & HVAC Services" },
+            { val: "plomeria", text: "🔧 Plumbing & Gas Services" },
+            { val: "pintura", text: "🎨 Painting & Drywall / Remodeling" },
+            { val: "carpinteria", text: "🪵 Custom Carpentry & Metalwork" },
+            { val: "jardineria", text: "🌿 Gardening & Pool Maintenance" },
+            { val: "pasteleria", text: "🎂 Bakery & Catering" },
+            { val: "fotografia", text: "📸 Photography & Videography" },
+            { val: "dj", text: "🎧 DJ, Sound & Lighting" },
+            { val: "fletes", text: "🚚 Freight & Moving Services" },
+            { val: "mecanica", text: "🚗 Mechanics & Auto Detailing" },
+            { val: "general", text: "📋 General / Custom" }
+        ]
+    };
+
+    const translations = {
+        es: {
+            mainTitle: "Sistema de Presupuestos",
+            secCustom: "🎨 Personalización & Rubro",
+            selectRubro: "Seleccioná tu Rubro / Plantilla",
+            brandColor: "Color Principal de Marca",
+            currency: "Moneda",
+            logo: "Logo (Opcional - Se guarda automáticamente)",
+            btnQuitarLogo: "Quitar Logo",
+            secEmisor: "🏢 Tus Datos (Emisor)",
+            emisorName: "Nombre / Emprendimiento",
+            emisorCuit: "CUIT / DNI / ID (Opcional)",
+            emisorTel: "Teléfono / WhatsApp",
+            emisorPago: "Datos para Cobro / Señas (Alias, CBU, Bank, Paypal)",
+            secCliente: "👤 Datos del Cliente & Validez",
+            clienteName: "Nombre del Cliente",
+            clienteCuit: "CUIT / DNI / ID Cliente (Opcional)",
+            checkFecha: "Incluir Fecha",
+            validez: "Validez de la Cotización",
+            validezDefault: "15 días corridos",
+            secItems: "📦 Ítems a Cotizar",
+            btnAddItem: "+ Agregar Ítem",
+            discount: "Descuento (%)",
+            conditions: "Condiciones / Tiempos / Garantías",
+            checkFirmas: "Incluir Bloque de Firmas",
+            btnDlPdf: "📥 Descargar PDF",
+            btnWsp: "💬 Enviar WhatsApp",
+            // PDF
+            docTitle: "PRESUPUESTO",
+            subTitleDefault: "Presupuesto de Servicios",
+            lblEmisorMeta: "EMISOR:",
+            lblClienteMeta: "CLIENTE:",
+            lblCuitEmisor: "CUIT/DNI:",
+            lblCuitCliente: "CUIT/DNI:",
+            lblValidezMeta: "Validez:",
+            thDesc: "Descripción",
+            thCant: "Cant.",
+            thPrice: "Precio",
+            thTotal: "Total",
+            subtotal: "Subtotal:",
+            discountLbl: "Descuento",
+            totalFinal: "Total Final:",
+            condicionesLbl: "Condiciones del servicio:",
+            pagoLbl: "Datos para transferencia / seña:",
+            lblFirmaEmisor: "Firma Emisor / Prestador",
+            lblFirmaCliente: "Firma Cliente (Conformidad)",
+            footerText: "Presupuesto generado gratis con <strong>xevra.ar</strong> — Soluciones Web",
+            // WSP
+            wspHola: "Hola",
+            wspEnvio: "Te envío el presupuesto solicitado de",
+            wspDetalle: "📋 *Detalle:*",
+            wspTotal: "💰 *Total Final:*",
+            wspValidez: "⏳ *Validez:*",
+            wspPago: "💳 *Datos para seña/pago:*",
+            wspGracias: "Quedo a tu disposición por cualquier consulta. ¡Muchas gracias!"
+        },
+        en: {
+            mainTitle: "Quote System",
+            secCustom: "🎨 Customization & Industry",
+            selectRubro: "Select Industry / Template",
+            brandColor: "Primary Brand Color",
+            currency: "Currency",
+            logo: "Logo (Optional - Saved automatically)",
+            btnQuitarLogo: "Remove Logo",
+            secEmisor: "🏢 Your Information (Issuer)",
+            emisorName: "Name / Business Name",
+            emisorCuit: "Tax ID / SSN (Optional)",
+            emisorTel: "Phone / WhatsApp",
+            emisorPago: "Payment / Bank Details (Wire, Zelle, Paypal, MP)",
+            secCliente: "👤 Client Information & Validity",
+            clienteName: "Client Name",
+            clienteCuit: "Tax ID / SSN Client (Optional)",
+            checkFecha: "Include Date",
+            validez: "Quote Validity",
+            validezDefault: "15 calendar days",
+            secItems: "📦 Line Items",
+            btnAddItem: "+ Add Line Item",
+            discount: "Discount (%)",
+            conditions: "Terms / Lead Times / Warranties",
+            checkFirmas: "Include Signature Block",
+            btnDlPdf: "📥 Download PDF",
+            btnWsp: "💬 Send WhatsApp",
+            // PDF
+            docTitle: "QUOTE",
+            subTitleDefault: "Service Estimate",
+            lblEmisorMeta: "ISSUER:",
+            lblClienteMeta: "CLIENT:",
+            lblCuitEmisor: "Tax ID:",
+            lblCuitCliente: "Tax ID:",
+            lblValidezMeta: "Validity:",
+            thDesc: "Description",
+            thCant: "Qty",
+            thPrice: "Price",
+            thTotal: "Total",
+            subtotal: "Subtotal:",
+            discountLbl: "Discount",
+            totalFinal: "Final Total:",
+            condicionesLbl: "Terms & Conditions:",
+            pagoLbl: "Payment / Bank Info:",
+            lblFirmaEmisor: "Authorized Signature (Issuer)",
+            lblFirmaCliente: "Client Signature / Acceptance",
+            footerText: "Quote generated for free with <strong>xevra.ar</strong> — Web Solutions",
+            // WSP
+            wspHola: "Hi",
+            wspEnvio: "Here is the requested estimate from",
+            wspDetalle: "📋 *Details:*",
+            wspTotal: "💰 *Final Total:*",
+            wspValidez: "⏳ *Validity:*",
+            wspPago: "💳 *Payment info:*",
+            wspGracias: "Feel free to reach out if you have any questions. Thank you!"
+        }
+    };
+
+    // Plantillas completas Bilingües por Rubro
+    const plantillasRubros = {
+        web: {
+            emisor: "Xevra Web Studio",
+            subtitulo: { es: "Desarrollo & Servicios Digitales", en: "Web Development & Digital Services" },
+            condiciones: { es: "Tiempo estimado de entrega: 7 a 10 días hábiles. Formato de pago: 50% anticipo y 50% contra entrega.", en: "Estimated delivery: 7 to 10 business days. Payment terms: 50% deposit and 50% upon delivery." },
+            items: [
+                { desc: { es: "Diseño Web Landing Page Premium", en: "Premium Landing Page Web Design" }, cant: 1, precio: 45000 },
+                { desc: { es: "Configuración Dominio + Hosting (1 año)", en: "Domain + Hosting Setup (1 year)" }, cant: 1, precio: 15000 }
+            ]
+        },
+        marketing: {
+            emisor: "Marketing & Social Media",
+            subtitulo: { es: "Gestión de Marca & Anuncios", en: "Brand Management & Paid Ads" },
+            condiciones: { es: "Abono mensual por adelantado. No incluye presupuesto de inversión publicitaria en Meta/Google Ads.", en: "Monthly retainer in advance. Ad spend budget on Meta/Google Ads not included." },
+            items: [
+                { desc: { es: "Gestión mensual de contenidos (12 posts + 8 stories)", en: "Monthly content management (12 posts + 8 stories)" }, cant: 1, precio: 35000 },
+                { desc: { es: "Configuración y optimización de campañas de anuncios", en: "Ad Campaign Setup & Optimization" }, cant: 1, precio: 15000 }
+            ]
+        },
+        electricidad: {
+            emisor: "Servicios Eléctricos Integrales",
+            subtitulo: { es: "Instalaciones & Climatización", en: "Electrical & HVAC Services" },
+            condiciones: { es: "Garantía de instalación por 60 días. No incluye costo de materiales salvo especificación explícita.", en: "60-day installation warranty. Materials cost not included unless specified." },
+            items: [
+                { desc: { es: "Instalación de Aire Acondicionado Split", en: "Split AC Unit Installation" }, cant: 1, precio: 65000 },
+                { desc: { es: "Revisión y cambio de térmicas en tablero", en: "Electrical panel check & breaker replacement" }, cant: 1, precio: 20000 }
+            ]
+        },
+        plomeria: {
+            emisor: "Plomería & Gasista Matriculado",
+            subtitulo: { es: "Instalaciones & Reparaciones", en: "Plumbing & Gas Repairs" },
+            condiciones: { es: "Trabajos garantizados por 30 días posteriores a la entrega.", en: "Labor guaranteed for 30 days after completion." },
+            items: [
+                { desc: { es: "Instalación de cocina a gas y prueba de fuga", en: "Gas stove installation & leak testing" }, cant: 1, precio: 25000 },
+                { desc: { es: "Cambio de grifería y cañería de desagüe", en: "Faucet & drainage pipe replacement" }, cant: 1, precio: 18000 }
+            ]
+        },
+        pintura: {
+            emisor: "Pintura & Remodelaciones",
+            subtitulo: { es: "Pintura de Interiores & Durlock", en: "Interior Painting & Drywall" },
+            condiciones: { es: "Incluye lijado, enduido y 2 manos de pintura látex de primera calidad.", en: "Includes sanding, spackling, and 2 coats of premium latex paint." },
+            items: [
+                { desc: { es: "Pintura de ambiente (Paredes y Cielorraso)", en: "Room painting (Walls & Ceiling)" }, cant: 1, precio: 40000 },
+                { desc: { es: "Reparación de grietas y humedad previa", en: "Pre-painting crack & dampness repair" }, cant: 1, precio: 12000 }
+            ]
+        },
+        carpinteria: {
+            emisor: "Carpintería & Herrería A Medida",
+            subtitulo: { es: "Muebles & Estructuras", en: "Custom Furniture & Metalworks" },
+            condiciones: { es: "Plazo de fabricación: 15 días. Seña inicial del 50% para compra de insumos.", en: "Manufacturing time: 15 days. 50% initial deposit required for materials." },
+            items: [
+                { desc: { es: "Mueble bajo mesada en Melamina a medida", en: "Custom melamine kitchen cabinet" }, cant: 1, precio: 85000 }
+            ]
+        },
+        jardineria: {
+            emisor: "Jardinería & Mantenimiento de Piletas",
+            subtitulo: { es: "Parquización & Mantenimiento", en: "Landscaping & Pool Care" },
+            condiciones: { es: "Incluye retiro de residuos vegetales y químicos básicos para pileta.", en: "Includes green waste removal and basic pool chemicals." },
+            items: [
+                { desc: { es: "Corte de césped y aireado de parque", en: "Lawn mowing & aeration" }, cant: 1, precio: 15000 },
+                { desc: { es: "Limpieza profunda y purificado de pileta", en: "Deep pool cleaning & water treatment" }, cant: 1, precio: 20000 }
+            ]
+        },
+        pasteleria: {
+            emisor: "Sweet & Savory Pastelería",
+            subtitulo: { es: "Catering & Eventos Especiales", en: "Catering & Special Events" },
+            condiciones: { es: "Encargos con 5 días de anticipación. Cancelación hasta 48hs antes con 50% de reintegro.", en: "Orders required 5 days in advance. Cancellation up to 48h prior (50% refund)." },
+            items: [
+                { desc: { es: "Torta de Cumpleaños Personalizada (2.5 kg)", en: "Custom Birthday Cake (2.5 kg)" }, cant: 1, precio: 30000 },
+                { desc: { es: "Combo Mesa Dulce (Muffins, Tartas, Alfajores)", en: "Dessert Table Combo (Muffins, Pies, Pastries)" }, cant: 1, precio: 25000 }
+            ]
+        },
+        fotografia: {
+            emisor: "Studio Fotográfico & Video",
+            subtitulo: { es: "Cobertura de Eventos & Sesiones", en: "Event Coverage & Photoshoots" },
+            condiciones: { es: "Entrega de material digital editado en alta calidad en 7 días vía Google Drive.", en: "Delivery of high-res edited digital files in 7 days via Google Drive." },
+            items: [
+                { desc: { es: "Cobertura fotográfica de evento (3 horas)", en: "Event photo coverage (3 hours)" }, cant: 1, precio: 50000 },
+                { desc: { es: "Edición digital y retoque de 50 fotos elegidas", en: "Digital editing & retouching of 50 chosen photos" }, cant: 1, precio: 18000 }
+            ]
+        },
+        dj: {
+            emisor: "Pro Sound & DJ Staff",
+            subtitulo: { es: "Sonido, Iluminación & DJ para Eventos", en: "Sound, Lighting & DJ Services" },
+            condiciones: { es: "El servicio abarca hasta 6 horas de evento. Hora adicional negociable en el lugar.", en: "Service includes up to 6 hours of event duration. Extra hours negotiable on-site." },
+            items: [
+                { desc: { es: "Servicio de DJ + Sonido e Iluminación LED (hasta 100 pers)", en: "DJ Service + Sound & LED Lighting (up to 100 guests)" }, cant: 1, precio: 90000 }
+            ]
+        },
+        fletes: {
+            emisor: "Fletes & Mudanzas Rápidas",
+            subtitulo: { es: "Logística & Transporte", en: "Logistics & Moving Services" },
+            condiciones: { es: "El costo incluye chofer y combustible. Peajes y ayudantes extra se cotizan aparte.", en: "Includes driver and fuel. Tolls and extra helpers quoted separately." },
+            items: [
+                { desc: { es: "Servicio de Flete Urbano (Hasta 15 km)", en: "Urban Freight Service (Up to 15 km)" }, cant: 1, precio: 22000 },
+                { desc: { es: "Ayudante para carga y descarga (por hora)", en: "Helper for loading/unloading (per hour)" }, cant: 2, precio: 6000 }
+            ]
+        },
+        mecanica: {
+            emisor: "Taller Mecánico & Detailing",
+            subtitulo: { es: "Mantenimiento & Estética Vehicular", en: "Auto Repair & Detailing" },
+            condiciones: { es: "Repuestos originales con garantía oficial. Revisión previa sin cargo.", en: "Original spare parts with official warranty. Free pre-inspection." },
+            items: [
+                { desc: { es: "Service Completo (Aceite y Filtros)", en: "Full Service (Oil & Filters)" }, cant: 1, precio: 45000 },
+                { desc: { es: "Tratamiento Acrílico / Detailing de carrocería", en: "Acrylic Treatment / Body Detailing" }, cant: 1, precio: 38000 }
+            ]
+        },
+        general: {
+            emisor: "Mi Negocio / Servicios",
+            subtitulo: { es: "Presupuesto General", en: "General Estimate" },
+            condiciones: { es: "", en: "" },
+            items: [
+                { desc: { es: "Servicio / Producto Profesional 1", en: "Professional Service / Product 1" }, cant: 1, precio: 15000 }
+            ]
+        }
+    };
+
+    let items = [];
+
+    // Inicializar Fecha
+    document.getElementById('input-fecha').valueAsDate = new Date();
+
+    function toggleIdioma() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        
+        const spanEs = document.getElementById('lang-es');
+        const spanEn = document.getElementById('lang-en');
+        if (currentLang === 'es') {
+            spanEs.className = 'active-lang';
+            spanEn.className = '';
+        } else {
+            spanEs.className = '';
+            spanEn.className = 'active-lang';
+        }
+
+        aplicarTraduccionesUI();
+        actualizarOpcionesDesplegableRubro();
+        cambiarRubro(true);
+        guardarPreferencias();
+    }
+
+    function actualizarOpcionesDesplegableRubro() {
+        const select = document.getElementById('select-rubro');
+        const valorSeleccionado = select.value || 'web';
+        select.innerHTML = '';
+        
+        const opciones = rubroOptionsTranslation[currentLang];
+        opciones.forEach(op => {
+            const optElem = document.createElement('option');
+            optElem.value = op.val;
+            optElem.innerText = op.text;
+            if (op.val === valorSeleccionado) optElem.selected = true;
+            select.appendChild(optElem);
+        });
+    }
+
+    function aplicarTraduccionesUI() {
+        const t = translations[currentLang];
+        document.getElementById('txt-main-title').innerText = t.mainTitle;
+        document.getElementById('lbl-sec-custom').innerText = t.secCustom;
+        document.getElementById('lbl-select-rubro').innerText = t.selectRubro;
+        document.getElementById('lbl-brand-color').innerText = t.brandColor;
+        document.getElementById('lbl-currency').innerText = t.currency;
+        document.getElementById('lbl-logo').innerText = t.logo;
+        document.getElementById('btn-quitar-logo').innerText = t.btnQuitarLogo;
+        document.getElementById('lbl-sec-emisor').innerText = t.secEmisor;
+        document.getElementById('lbl-emisor-name').innerText = t.emisorName;
+        document.getElementById('lbl-emisor-cuit').innerText = t.emisorCuit;
+        document.getElementById('lbl-emisor-tel').innerText = t.emisorTel;
+        document.getElementById('lbl-emisor-pago').innerText = t.emisorPago;
+        document.getElementById('lbl-sec-cliente').innerText = t.secCliente;
+        document.getElementById('lbl-cliente-name').innerText = t.clienteName;
+        document.getElementById('lbl-cliente-cuit').innerText = t.clienteCuit;
+        
+        // Checkbox fecha
+        const checkFech = document.getElementById('check-fecha');
+        document.getElementById('lbl-check-fecha').innerHTML = '';
+        document.getElementById('lbl-check-fecha').appendChild(checkFech);
+        document.getElementById('lbl-check-fecha').append(" " + t.checkFecha);
+
+        // Checkbox firmas
+        const checkFirm = document.getElementById('check-firmas');
+        document.getElementById('lbl-check-firmas').innerHTML = '';
+        document.getElementById('lbl-check-firmas').appendChild(checkFirm);
+        document.getElementById('lbl-check-firmas').append(" " + t.checkFirmas);
+
+        document.getElementById('lbl-validez').innerText = t.validez;
+        document.getElementById('lbl-sec-items').innerText = t.secItems;
+        document.getElementById('btn-add-item').innerText = t.btnAddItem;
+        document.getElementById('lbl-discount').innerText = t.discount;
+        document.getElementById('lbl-conditions').innerText = t.conditions;
+        document.getElementById('btn-dl-pdf').innerText = t.btnDlPdf;
+        document.getElementById('btn-wsp-link').innerText = t.btnWsp;
+
+        // PDF Labels
+        document.getElementById('pv-title-doc').innerText = t.docTitle;
+        document.getElementById('pv-lbl-emisor-meta').innerText = t.lblEmisorMeta;
+        document.getElementById('pv-lbl-cliente-meta').innerText = t.lblClienteMeta;
+        document.getElementById('pv-lbl-cuit-emisor').innerText = t.lblCuitEmisor;
+        document.getElementById('pv-lbl-cuit-cliente').innerText = t.lblCuitCliente;
+        document.getElementById('pv-lbl-validez-meta').innerText = t.lblValidezMeta;
+        document.getElementById('th-desc').innerText = t.thDesc;
+        document.getElementById('th-cant').innerText = t.thCant;
+        document.getElementById('th-price').innerText = t.thPrice;
+        document.getElementById('th-total').innerText = t.thTotal;
+        document.getElementById('pv-lbl-subtotal').innerText = t.subtotal;
+        document.getElementById('pv-lbl-discount').innerText = t.discountLbl;
+        document.getElementById('pv-lbl-total-final').innerText = t.totalFinal;
+        document.getElementById('pv-lbl-condiciones').innerText = t.condicionesLbl;
+        document.getElementById('pv-lbl-pago').innerText = t.pagoLbl;
+        document.getElementById('pv-lbl-firma-emisor').innerText = t.lblFirmaEmisor;
+        document.getElementById('pv-lbl-firma-cliente').innerText = t.lblFirmaCliente;
+        document.getElementById('pv-footer-text').innerHTML = t.footerText;
+    }
+
+    function cambiarColorMarca(color) {
+        document.documentElement.style.setProperty('--primary-color', color);
+        guardarPreferencias();
+    }
+
+    function cargarLogo(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgData = e.target.result;
+                const imgLogo = document.getElementById('pv-logo');
+                imgLogo.src = imgData;
+                imgLogo.style.display = 'block';
+                document.getElementById('btn-quitar-logo').style.display = 'inline-block';
+                localStorage.setItem('xevra_logo', imgData);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function quitarLogo() {
+        document.getElementById('logo-input').value = '';
+        const imgLogo = document.getElementById('pv-logo');
+        imgLogo.src = '';
+        imgLogo.style.display = 'none';
+        document.getElementById('btn-quitar-logo').style.display = 'none';
+        localStorage.removeItem('xevra_logo');
+    }
+
+    function guardarPreferencias() {
+        const datos = {
+            lang: currentLang,
+            emisor: document.getElementById('emisor').value,
+            cuitEmisor: document.getElementById('cuit-emisor').value,
+            telEmisor: document.getElementById('tel-emisor').value,
+            pagoEmisor: document.getElementById('pago-emisor').value,
+            primaryColor: document.getElementById('primary-color').value,
+            moneda: document.getElementById('select-moneda').value
+        };
+        localStorage.setItem('xevra_pref_datos', JSON.stringify(datos));
+    }
+
+    function cargarPreferencias() {
+        const logoGuardado = localStorage.getItem('xevra_logo');
+        if (logoGuardado) {
+            const imgLogo = document.getElementById('pv-logo');
+            imgLogo.src = logoGuardado;
+            imgLogo.style.display = 'block';
+            document.getElementById('btn-quitar-logo').style.display = 'inline-block';
+        }
+
+        const prefGuardadas = localStorage.getItem('xevra_pref_datos');
+        if (prefGuardadas) {
+            const datos = JSON.parse(prefGuardadas);
+            if (datos.lang) currentLang = datos.lang;
+            if (datos.emisor !== undefined) document.getElementById('emisor').value = datos.emisor;
+            if (datos.cuitEmisor !== undefined) document.getElementById('cuit-emisor').value = datos.cuitEmisor;
+            if (datos.telEmisor !== undefined) document.getElementById('tel-emisor').value = datos.telEmisor;
+            if (datos.pagoEmisor !== undefined) document.getElementById('pago-emisor').value = datos.pagoEmisor;
+            if (datos.primaryColor) {
+                document.getElementById('primary-color').value = datos.primaryColor;
+                cambiarColorMarca(datos.primaryColor);
+            }
+            if (datos.moneda) document.getElementById('select-moneda').value = datos.moneda;
+        }
+
+        document.getElementById('lang-es').className = currentLang === 'es' ? 'active-lang' : '';
+        document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : '';
+
+        aplicarTraduccionesUI();
+        actualizarOpcionesDesplegableRubro();
+    }
+
+    function cambiarRubro(resetItems = true) {
+        const rubroKey = document.getElementById('select-rubro').value || 'web';
+        const plantilla = plantillasRubros[rubroKey] || plantillasRubros.general;
+
+        if (!document.getElementById('emisor').value) {
+            document.getElementById('emisor').value = plantilla.emisor;
+        }
+        
+        document.getElementById('pv-subtitulo').innerText = plantilla.subtitulo[currentLang] || plantilla.subtitulo.es;
+        document.getElementById('condiciones-input').value = plantilla.condiciones[currentLang] || plantilla.condiciones.es;
+        document.getElementById('validez-input').value = translations[currentLang].validezDefault;
+
+        if (resetItems) {
+            items = plantilla.items.map(item => ({
+                desc: typeof item.desc === 'object' ? item.desc[currentLang] : item.desc,
+                cant: item.cant,
+                precio: item.precio
+            }));
+        }
+        renderizarFormulario();
+    }
+
+    function renderizarFormulario() {
+        const contenedor = document.getElementById('lista-items');
+        contenedor.innerHTML = '';
+        
+        items.forEach((item, index) => {
+            contenedor.innerHTML += `
+                <div class="item-row">
+                    <input type="text" value="${item.desc}" placeholder="${currentLang === 'es' ? 'Descripción' : 'Description'}" oninput="actualizarItem(${index}, 'desc', this.value)">
+                    <input type="number" value="${item.cant}" min="1" placeholder="${currentLang === 'es' ? 'Cant' : 'Qty'}" oninput="actualizarItem(${index}, 'cant', this.value)">
+                    <input type="number" value="${item.precio}" placeholder="${currentLang === 'es' ? 'Precio' : 'Price'}" oninput="actualizarItem(${index}, 'precio', this.value)">
+                    <button class="btn-remove" onclick="eliminarItem(${index})">✕</button>
+                </div>
+            `;
+        });
+        actualizarVistas();
+    }
+
+    function agregarItem() {
+        items.push({ desc: "", cant: 1, precio: 0 });
+        renderizarFormulario();
+    }
+
+    function eliminarItem(index) {
+        items.splice(index, 1);
+        renderizarFormulario();
+    }
+
+    function actualizarItem(index, campo, valor) {
+        items[index][campo] = campo === 'desc' ? valor : parseFloat(valor) || 0;
+        actualizarVistas();
+    }
+
+    function actualizarVistas() {
+        const t = translations[currentLang];
+        const moneda = document.getElementById('select-moneda').value;
+        document.querySelectorAll('.symbol-moneda').forEach(el => el.innerText = moneda + ' ');
+
+        const emisorVal = document.getElementById('emisor').value || 'Mi Negocio';
+        document.getElementById('pv-emisor').innerText = emisorVal;
+        document.getElementById('pv-emisor-meta').innerText = emisorVal;
+
+        const clienteVal = document.getElementById('cliente').value || 'Cliente';
+        document.getElementById('pv-cliente').innerText = clienteVal;
+
+        const cuitE = document.getElementById('cuit-emisor').value;
+        document.getElementById('pv-cuit-emisor-box').style.display = cuitE ? 'block' : 'none';
+        document.getElementById('pv-cuit-emisor').innerText = cuitE;
+
+        const telE = document.getElementById('tel-emisor').value;
+        document.getElementById('pv-tel-emisor-box').style.display = telE ? 'block' : 'none';
+        document.getElementById('pv-tel-emisor').innerText = telE;
+
+        const cuitC = document.getElementById('cuit-cliente').value;
+        document.getElementById('pv-cuit-cliente-box').style.display = cuitC ? 'block' : 'none';
+        document.getElementById('pv-cuit-cliente').innerText = cuitC;
+
+        document.getElementById('pv-validez').innerText = document.getElementById('validez-input').value || t.validezDefault;
+
+        const incluirFecha = document.getElementById('check-fecha').checked;
+        const fechaBox = document.getElementById('pv-fecha-box');
+        if (incluirFecha) {
+            fechaBox.style.display = 'block';
+            const valFecha = document.getElementById('input-fecha').value;
+            if (valFecha) {
+                const partes = valFecha.split('-');
+                document.getElementById('pv-fecha').innerText = currentLang === 'es' 
+                    ? `${partes[2]}/${partes[1]}/${partes[0]}`
+                    : `${partes[1]}/${partes[2]}/${partes[0]}`;
+            } else {
+                document.getElementById('pv-fecha').innerText = new Date().toLocaleDateString(currentLang === 'es' ? 'es-AR' : 'en-US');
+            }
+        } else {
+            fechaBox.style.display = 'none';
+        }
+
+        // Render Tabla
+        const tbody = document.getElementById('pv-tabla-body');
+        tbody.innerHTML = '';
+        let subtotal = 0;
+
+        items.forEach(item => {
+            const totalLinea = item.cant * item.precio;
+            subtotal += totalLinea;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.desc || '—'}</td>
+                    <td style="text-align: center;">${item.cant}</td>
+                    <td style="text-align: right;">${moneda} ${item.precio.toLocaleString()}</td>
+                    <td style="text-align: right;">${moneda} ${totalLinea.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+
+        const porcentajeDesc = parseFloat(document.getElementById('descuento-pct').value) || 0;
+        const montoDescuento = (subtotal * porcentajeDesc) / 100;
+        const totalFinal = subtotal - montoDescuento;
+
+        const rowDesc = document.getElementById('row-desc-container');
+        rowDesc.style.display = porcentajeDesc > 0 ? 'flex' : 'none';
+
+        document.getElementById('pv-subtotal').innerText = subtotal.toLocaleString();
+        document.getElementById('pv-desc-pct').innerText = porcentajeDesc;
+        document.getElementById('pv-desc-monto').innerText = montoDescuento.toLocaleString();
+        document.getElementById('pv-total').innerText = totalFinal.toLocaleString();
+
+        // Control dinámico del recuadro de Condiciones del Servicio
+        const condicionesTexto = document.getElementById('condiciones-input').value.trim();
+        const condicionesBox = document.getElementById('pv-condiciones-box');
+        if (condicionesTexto) {
+            condicionesBox.style.display = 'block';
+            document.getElementById('pv-condiciones-texto').innerText = condicionesTexto;
+        } else {
+            condicionesBox.style.display = 'none';
+        }
+        
+        // Control dinámico del recuadro de Datos de Pago
+        const pagoTexto = document.getElementById('pago-emisor').value.trim();
+        const pagoBox = document.getElementById('pv-pago-box');
+        if (pagoTexto) {
+            pagoBox.style.display = 'block';
+            document.getElementById('pv-pago-texto').innerText = pagoTexto;
+        } else {
+            pagoBox.style.display = 'none';
+        }
+
+        // Control de Visibilidad de Firmas
+        const incluirFirmas = document.getElementById('check-firmas').checked;
+        document.getElementById('pv-firmas-box').style.display = incluirFirmas ? 'grid' : 'none';
+
+        actualizarLinkWhatsApp(clienteVal, emisorVal, totalFinal, moneda);
+    }
+
+    function actualizarLinkWhatsApp(cliente, emisor, total, moneda) {
+        const t = translations[currentLang];
+        let detalleText = "";
+        items.forEach(i => {
+            if(i.desc) detalleText += `• ${i.desc} (x${i.cant}): ${moneda} ${(i.cant * i.precio).toLocaleString()}\n`;
+        });
+
+        const pagoText = document.getElementById('pago-emisor').value;
+        const validezText = document.getElementById('validez-input').value;
+
+        let msg = `${t.wspHola} *${cliente}*! 👋 ${t.wspEnvio} *${emisor}*:\n\n`;
+        msg += `${t.wspDetalle}\n${detalleText}\n`;
+        msg += `${t.wspTotal} ${moneda} ${total.toLocaleString()}\n`;
+        if (validezText) msg += `${t.wspValidez} ${validezText}\n`;
+        if (pagoText) msg += `${t.wspPago} ${pagoText}\n`;
+        msg += `\n${t.wspGracias}`;
+
+        const link = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+        document.getElementById('btn-wsp-link').href = link;
+    }
+
+    function descargarPDF() {
+        const elemento = document.getElementById('hoja-presupuesto');
+        
+        const originalMaxWidth = elemento.style.maxWidth;
+        const originalWidth = elemento.style.width;
+
+        elemento.style.maxWidth = '100%';
+        elemento.style.width = '750px';
+
+        const fileNamePrefix = currentLang === 'es' ? 'Presupuesto' : 'Quote';
+        const opciones = {
+            margin:       [10, 10, 10, 10],
+            filename:     `${fileNamePrefix}-${document.getElementById('cliente').value || 'Cliente'}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opciones).from(elemento).save().then(() => {
+            elemento.style.maxWidth = originalMaxWidth;
+            elemento.style.width = originalWidth;
+        });
+    }
+
+    // Cargar preferencia e iniciar
+    cargarPreferencias();
+    cambiarRubro(true);
+</script>
+
+</body>
+</html>
